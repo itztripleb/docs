@@ -1,0 +1,17 @@
+sidebar:
+  - title: "Documentation"
+    items:
+      - title: "Satoshi Perps"
+        href: "/Satoshi-Perps"
+      - title: "SA Perps Product Roadmap"
+        href: "/SA-Perps-Product-Roadmap"
+      - title: "Protocol"
+        href: "/Protocol"
+      - title: "Resilient Price Oracle"
+        href: "/Resilient-Price-Oracle"
+      - title: "How to Trade"
+        href: "/How-to-Trade"
+      - title: "How to Stake Liquidity"
+        href: "/How-to-Stake-Liquidity"
+      - title: "Refferals"
+        href: "/Refferals"
