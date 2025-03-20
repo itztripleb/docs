@@ -1,11 +1,11 @@
 ---
-title: 'Satoshi Perps Protocol'
-description: 'A fully on-chain Bitcoin-backed Perpetuals Exchange built on Core'
+title: 'Satoshi Perps'
+description: 'Satoshi Perps Protocol'
 ---
 
 # Welcome to Satoshi Perps
 
-Satoshi Perps v1 is a fully on-chain Bitcoin-backed Perpetuals Exchange built on Core, a Bitcoin-aligned EVM L1.
+Satoshi Perps v1 is a fully on-chain Bitcoin-backed Perpetuals Exchange built on Core, a Bitcoin-aligned EVM L1
 
 ## The Satoshi Perps Mission
 
@@ -13,41 +13,594 @@ Imagine a world where Bitcoin isn't just a store of value, but a powerful engine
 
 Satoshi Perps' mission is simple yet revolutionary: to empower Bitcoin holders with the tools to put their BTC to work, earning yields and participating in trading markets without ever leaving the Bitcoin ecosystem. By building on-chain perpetual contracts backed by Bitcoin, Satoshi Perps aims to increase capital efficiency while allowing users to maintain their exposure to BTC.
 
-## Key Features
+Let's dive into how Satoshi Perps makes this vision a reality.
 
-### Leverage Trading
+## Leverage Trading 
 
 Users can open up to 250x leveraged long or short positions on many asset classes including Cryptocurrency, Forex, and Commodities. Satoshi Perps also accepts various Bitcoin synthetic assets as collateral with a correlation based liquidity aggregation model, allowing for flexible position and risk management strategies.
 
-### Market Making Vaults (SLP)
+## Market Making Vaults (SLP)
 
 Users can simply deposit assets into the SLP-BTC vault to become market makers on Satoshi Perps. Satoshi Perps offers one of the highest real APR% for LPs in the market paid in $BTC. This is achieved through 3 yield sources:
 
 - A portion of the platform revenue from open/close fees and borrow rates are allocated as rewards for liquidity providers in the form of yield paid in BTC.
+
 - SLPs(Satoshi Liquidity Providers) accrue value from all trader losses and liquidations from acting as constant counterparties to all trades.
+
 - Satoshi Perps also allocates a significant percentage of $rSAT emissions to the LPs as additional incentives.
 
-## Product Features
+## Product Features:
 
-### 💰 Deep Aggregated Liquidity
-Satoshi Perps supports multiple correlated assets as collateral. Traders at Satoshi Perps are not restricted to a single wrapped BTC collateral asset on their trade direction. This will allow them to execute certain strategies much more effectively i.e. carry-trade strategy.
+💰 **Deep Aggregated Liquidity**: Satoshi Perps supports multiple correlated assets as collateral. Traders at Satoshi Perps are not restricted to a single wrapped BTC collateral asset on their trade direction. This will allow them to execute certain strategies much more effectively i.e. carry-trade strategy.
 
-### 📈 High Leverage
-Satoshi Perps supports a maximum leverage of up to 250x of collateral value depending on the trading asset class. This feature allows users with high conviction in their market positions to maximize their potential returns.
+📈 **High Leverage**: Satoshi Perps supports a maximum leverage of up to 250x of collateral value depending on the trading asset class. This feature allows users with high conviction in their market 
 
-### 👁 Robust Price Oracle
-Satoshi Perps utilizes the Resilient Oracle Aggregation model, aggregating prices from multiple sources (i.e., Pyth, APRO, Stork, Redstone, API3, etc.) for price feeds for a fair and reliable price source. The robust setup also protects traders and liquidity providers from scam wicks or short-term rapid price movements in a volatile market condition.
+👁 **Robust Price Oracle**: Satoshi Perps utilizes the Resilient Oracle Aggregation model, aggregating prices from multiple sources (i.e., Pyth, APRO, Stork, Redstone, API3, etc.) for price feeds for a fair and reliable price source. The robust setup also protects traders and liquidity providers from scam wicks or short-term rapid price movements in a volatile market condition.
 
-### 🛡️ SLP Protection
-Satoshi Perps has multiple mechanisms in place to ensure our liquidity providers are safe from various risks.
+🛡️ **SLP Protection**: Satoshi Perps has multiple mechanisms in place to ensure our liquidity providers are safe from various risks.
 
-### 💻 Friendly UI/UX
-Satoshi Perps has put a lot of emphasis on delivering the best experience to our users. Whether you are a DeFi native or a newcomer to the space, we make sure that navigating through our application is as intuitive as it can get.
+💻 **Friendly UI/UX**: Satoshi Perps has put a lot of emphasis on delivering the best experience to our users. Whether you are a DeFi native or a newcomer to the space, we make sure that navigating through our application is as intuitive as it can get.
 
-### 🌐 Decentralization
-Satoshi Perps is a decentralized perpetual protocol. This means that You have custody of your own funds, and your own positions and maintain full control of them at all times.
+🌐 **Decentralization**: Satoshi Perps is a decentralized perpetual protocol. This means that You have custody of your own funds, and your own positions and maintain full control of them at all times. 
 
-### ⚖️ Capital Efficiency
-Satoshi Perps is very capital efficient by allowing traders to use Bitcoin as collateral while earning yield and PnL in BTC, as well as offering competitive transaction fees.
+⚖️**Capital Efficiency**: Satoshi Perps is very capital efficient by allowing traders to use Bitcoin as collateral while earning yield and PnL in BTC, as well as offering competitive transaction fees.
+
+---
+title: 'SA Perps Product Roadmap'
+description: 'Genesis (Q4 2024)'
+---
+
+# Genesis (Q4 2024)
+
+## Satoshi Perps v1 Development
+
+- Long-tail assets as collateral for both longs/shorts
+- Collateral-correlation-based Liquidity Pools
+- Oracle Aggregation Service (OAS) Integration
+- Integrate Oracles: Apro, Pyth
+- 1st Audit: Dex v1 + OAS
+- Satoshi Perps v1 Testnet
+- 2nd Audit: Dex v1.5 + OAS
+- Integrate Oracles: Stork, Switchboard
+- Integrate AMM Aggregator IceCreamSwap
+- Satoshi Perps v1 Mainnet
+
+## List launch Markets
+
+| Market | Market Tier |
+|--------|-------------|
+| BTC/USD | T1 |
+| GOLD/USD | T1 |
+| OIL/USD | T1 |
+| CORE/USD | T2 |
+| ETH/USD | T2 |
+| SOL/USD | T2 |
+| BNB/USD | T2 |
+| DOGE/USD | T2 |
+| TRX/USD | T2 |
+| SUI/USD | T2 |
+| AVAX/USD | T2 |
+| XRP/USD | T2 |
+| SHIB/USD | T2 |
+| ENA/USD | T3 |
+| LINK/USD | T3 |
+| GOAT/USD | T4 |
+| RETARDIO/USD | T4 |
+| POPCAT/USD | T4 |
+
+## Ideas to Explore:
+
+- List SLPs in Lending Markets to unlock higher capital efficiency (Colend, Avalon)
+- Telegram Bot integration (Perpie, VersaBot)
+- Trader Vaults (Akka Finance)
+
+---
+title: 'Protocol'
+description: 'Satoshi Perps v1 Protocol Overview'
+---
+
+# Bitcoin-backed Perpetuals On-chain
+
+## Comprehensive Technical Overview
+
+Satoshi Perps is a protocol designed to bring Bitcoin-backed perpetual contracts to the Core blockchain. Its mission is to enhance capital efficiency for Bitcoin holders while maintaining their exposure to BTC. Satoshi Perps achieves this by:
+
+- Enabling Bitcoin holders to earn yields on their BTC without losing directional exposure.
+- Facilitating on-chain perpetual trading using Bitcoin-based assets as collateral.
+- Providing simplified and scalable liquidity through Bitcoin-denominated liquidity pools.
+
+These are achieved through a sophisticated system architecture comprising five core components:
+
+1. Vault
+2. Routers
+3. Price Feeds
+4. $SAT Satoshi App Token
+5. SLP
+
+Each of these components plays a crucial role in creating a seamless, secure, and efficient trading environment. Let's delve into each component in detail.
+
+## Vault: The Core of Satoshi Perps
+
+The Vault contract is the cornerstone of the Satoshi Perps protocol, managing deposits, withdrawals, and trading functions. It's designed to handle complex operations while maintaining high security standards. Key features and operations:
+
+### Deposits
+Users can deposit Bitcoin-based tokens (e.g., WBTC, coreBTC) into the Vault to mint SLP-BTC tokens. For example, if the price of SLP-BTC is 1.50 BTC, a user can mint 1 SLP-BTC by depositing 1.50 WBTC tokens. This process increases the liquidity in the protocol and allows users to start earning yields on their Bitcoin holdings.
+
+### Withdrawals
+SLP tokens can be burned to withdraw the underlying assets. Following the previous example, if the price of SLP-BTC remains at 1.50 BTC, a user can burn 1 SLP-BTC to redeem 1.50 WBTC tokens. This ensures that users can exit their positions and reclaim their assets when needed.
+
+### Trading
+The Vault supports both long and short positions using Bitcoin-based assets as collateral. Here's how it works:
+
+**Longing**: A user can open a long position by depositing Bitcoin-based tokens. For example, a user might deposit 1 WBTC (worth $50,000) into the Vault and open a position of 5 BTC (worth $250,000). This would be a 5x leveraged long position. If the price of BTC increases by 10%, the user would make a profit of 5 BTC * 10% = 0.5 BTC (or $25,000 at the original price).
+
+**Shorting**: A user can open a short position using Bitcoin-based assets as collateral. A user might deposit 1 WBTC and open a short position of 5 BTC. This unique feature allows traders to maintain their Bitcoin exposure even when betting on price decreases.
+
+**Liquidations**: To maintain system solvency, positions can be liquidated by keepers if losses reduce the collateral to the point where position size / remaining collateral exceeds the maximum allowed leverage. This process is automated to ensure the stability of the protocol.
+
+## Routers: Streamlining Transactions
+
+The Router contracts in Satoshi Perps provide essential convenience functions that simplify user interactions with the Vault. These include:
+
+- Handling token transfers to the Vault
+- Managing the wrapping and unwrapping of native tokens
+- Implementing a sophisticated two-part transaction process for position changes
+
+The PositionRouter contract is particularly crucial in mitigating front-running issues. It employs a two-step process for increasing or decreasing positions:
+
+1. A user sends a request to increase/decrease a position to the PositionRouter.
+2. A keeper fetches the current index price from an aggregate of exchanges.
+3. The keeper executes the position at the current index price.
+4. If the position cannot be executed within the allowed slippage, the request is cancelled, and funds are returned to the user.
+
+This process significantly reduces the risk of front-running attacks, enhancing the fairness and security of the trading environment. Users can also execute their own positions if three minutes have passed since the initial request, ensuring the protocol remains functional even without active keepers.
+
+## Price Feeds: Ensuring Accurate and Fair Pricing with Resilient Price Oracle
+
+The PriceFeed contract is a critical component of Satoshi Perps, designed to provide accurate and manipulation-resistant price data. It works as follows:
+
+- Price Feed Keeper: Submits prices routinely for swaps.
+- Position Keeper: Submits prices when executing a position.
+
+The Vault uses the price from the keeper if it's within a configured percentage of the corresponding Resilient Price Oracle price. If the price exceeds this threshold, a spread is created between the bounded price and the Resilient Price Oracle price. This threshold is based on the historical maximum deviation of the Resilient Price Oracle price from the median price of reference exchanges.
+
+For example, if the maximum deviation is 2.5% and the Resilient Price Oracle price for BTC is $50,000:
+
+- If the keeper price is $51,500, the pricing on the Vault would be $50,000 to $51,500.
+- When opening a long position, the higher price ($51,500) is used.
+- When closing a long position, the lower price ($50,000) is used.
+- For short positions, the lower price is used when opening, and the higher price when closing.
+
+Additional safeguards include:
+
+- Price expiry: Keeper prices expire after five minutes, reverting to Resilient Price Oracle prices if no update is received.
+- Liquidation constraints: Liquidations can only occur if the Resilient Price Oracle price reaches the liquidation price for a position.
+- Watcher nodes: These verify that keeper-submitted prices haven't been tampered with, enforcing spreads if discrepancies are detected.
+- Fallback Price Feeds: When a price feed from a connected oracle provider stales, the Resilient Price Oracle utilizes fallback feeds to ensure continuity of protocol operations and mitigate miss-pricing risks
+
+Learn more about the Resilient Price Oracle in the next page.
+
+## $SAT Satoshi Token: Governance, Staking, and Rewards
+
+The Satoshi token or $SAT serves as the governance token of the protocol. Key features include:
+
+- Participation in protocol governance decisions
+- Staking for rewards, earn a part of Satoshi Perps protocol revenue paid in $BTC
+- Protocol incentives for traders and SLPs through $rSAT ("Reward Satoshi")
+
+More information on the $SAT token and future incentives coming soon...
+
+## SLP: Correlation-based Liquidity Provision
+
+SLP (Satoshi Liquidity Pool) tokens represent shares in asset-specific liquidity pools. Unlike general-purpose liquidity pools, Satoshi Perps' SLPs are designed to minimize impermanent loss for liquidity providers while maintaining exposure to a base asset. Key characteristics include:
+
+- Asset-specific pools: Each SLP is tied to a particular asset class (e.g., SLP-BTC for Bitcoin-based assets).
+- Price determination: The value of SLP tokens is based on the worth of all tokens within the pool, factoring in the profits and losses of all currently opened positions.
+- Yield generation: SLP holders earn from trading fees, borrow fees, trader losses, and liquidations.
+
+## Key Differentiators and Advanced Features
+
+**Bitcoin-Centric Design**: Satoshi Perps is specifically tailored for the Bitcoin ecosystem, allowing for increased capital efficiency while maintaining collateral and earnings in BTC through SLP-BTC.
+
+**Flexible Collateral**: Traders can use long-tailed Bitcoin-based assets as collateral for both long and short positions. This eliminates the need for stablecoins in the pools and allows traders to maintain their Bitcoin collateral exposure while trading.
+
+**Advanced Risk Management**:
+- Dynamic liquidation thresholds based on position size and market volatility
+- Partial liquidations to allow traders to maintain portions of their positions
+- Liquidation guards to prevent cascading liquidations during extreme market events
+
+**Innovative Borrow Rate Mechanism**: Satoshi Perps implements a borrow rate system that helps balance long and short positions while providing additional yield opportunities for SLP holders.
+
+## Access Control and Upgradeability
+
+Satoshi Perps implements a robust access control system to ensure the security and stability of the protocol:
+
+**Controller Account**: Managed by contributors, it can adjust parameters such as:
+- Swap and margin trading fees (up to a maximum of 5%)
+- Token weights for the SLP pool
+- Maximum allowed leverage
+- Maximum total capacity for long and short positions
+
+**Timelock Contract**: Controls more significant changes with a 24-hour delay, including:
+- Listing of new tokens
+- Updating the price feed
+- Modifying core contract functionalities
+
+**Multi-sig Safety**: A multi-signature wallet comprising advisors and community members can override the Timelock admin in case of detected malicious transactions.
+
+While the core logic of Satoshi Perps contracts cannot be altered, peripheral functions like fee calculations and pricing mechanisms can be updated through a carefully controlled process.
+
+## Advanced Attack Mitigations
+
+**Front-Running Protection**:
+- Two-step transaction process for position changes
+- Frequent price feed updates
+- Base swap fee to discourage small-margin front-running attempts
+
+**Flash Loan Attack Prevention**:
+- Use of oracle prices for key operations, making them independent of pool composition
+- Dynamic fees for swaps based on pool composition, preventing positive slippage exploitation
+
+**Oracle Manipulation Resistance**:
+- Multiple price sources (Resilient Price Oracle)
+- Spread enforcement and cumulative delta checks
+
+By combining these advanced features and security measures, Satoshi Perps aims to provide a robust, efficient, and secure platform for Bitcoin-backed perpetual trading, pushing the boundaries of what's possible in decentralized finance while maintaining a strong focus on the Bitcoin ecosystem.
+
+---
+title: 'Resilient Price Oracle'
+description: 'Aggregated Price Feeds Protocol'
+---
+
+# Introduction
+
+Satoshi Perps has adopted the Resilient Price Oracle protocol from Venus to enhance the reliability and security of our price feed system. This implementation addresses the limitations of single-source price oracles and introduces multiple safeguards to ensure accurate and dependable price data.
+
+## Key Features:
+
+### 1. Multi-Source Price Feeds
+Satoshi Perps' Resilient Oracle pulls price data from several reputable sources:
+
+- APRO
+- Pyth Network
+- RedStone
+- Switchboard
+- stork
+
+This diversity of sources significantly reduces the risk of price manipulation or failure from any single oracle.
+
+### 2. Cross-Validation Mechanism
+- Utilizes an algorithm to compare prices from different sources
+- Helps identify and mitigate erroneous or stale price data
+
+### 3. Fallback System
+- Automatically switches to alternative sources if the primary price feed fails or provides suspicious data
+- Ensures continuous operation and price accuracy
+
+### 4. Flexible Per-Token Configuration
+- Allows specific price oracles to be enabled or disabled for each token
+- Provides the flexibility to use the most suitable source for each asset
+
+## Governance and Security:
+
+### Configurable Settings:
+Satoshi Perps governance can adjust oracle settings through improvement proposals, including:
+
+- Pausing/resuming the oracle
+- Updating price feed configurations
+- Setting fixed prices for specific assets when necessary
+
+### Robust Security Measures:
+- Price Continuity: Ensures smooth transitions during any system updates
+- Comprehensive Testing: Thoroughly tested in simulated environments before deployment
+- Audited Code Base: Inherits the security benefits of the audited Venus protocol
+
+### Specialized Handling for Correlated Tokens:
+For tokens with strong correlations (e.g., Liquid Staked Tokens), the oracle:
+
+- Queries the exchange rate between correlated assets using smart contracts
+- Multiplies the exchange rate by the USD market price of the underlying asset
+- Uses dedicated oracles for each LST to ensure accurate pricing
+
+## Advantages for Satoshi Perps:
+- Enhanced resilience against oracle failures or attacks
+- Improved accuracy of asset prices, reducing risks of unwarranted liquidations or inflated borrowing
+- Flexibility to adapt to market changes and integrate new price data sources
+- Increased overall security and stability of the Satoshi Perps protocol
+
+By implementing this battle-tested oracle system, Satoshi Perps demonstrates its commitment to providing a secure and efficient DeFi platform for its users.
+
+---
+title: 'How to Trade'
+description: 'Interacting with Satoshi Perps'
+---
+
+# Interacting with Satoshi Perps
+
+## How to Trade
+Simple step-by-step guide on how to Trade on Satoshi Perps
+
+*The following guide is for informational purposes only. Trading perpetual futures carries significant risks. This is not financial advice.*
+
+### Funding Your Wallet
+To start trading on Satoshi Perps, you first need to fund your Core Wallet with CORE, the native token of the Core Blockchain. You'll need CORE to cover transaction fees when interacting with Satoshi Perps. Learn how to onboard on Core.
+
+If you're new to Web3, we recommend watching this video playlist by Core DAO.
+
+These short videos cover everything you need to start your on-chain web3 journey. [Watch Now].
+
+With CORE in your wallet, the next step is to acquire BTC for trading on Satoshi Perps. For this guide, we'll use SolvBTC.CORE , You can get SolvBTC.CORE in a few ways:
+
+### Bridging
+You can bridge many different assets through the official Core Bridge powered by LayerZero and then follow the instructions below.
+
+### Swapping
+Alternatively, you can use the CORE in your wallet to buy SolvBTC.CORE on-chain through AKKA
+
+### RPCs
+Since Satoshi Perps is a decentralized exchange, querying of data and submitting of transactions is done through an RPC URL.
+
+There may be times when the RPC URL is not as responsive as it should be, during these times you may notice data being slow to load or not loading on your page. It is also possible to hit the rate limit with the public Core Mainnet RPC URL (https://rpc.coredao.org) which would result in 429 errors.
+
+To continue using the exchange during these times you can use a backup URL or switch the RPC URL in the network settings of your wallet and the page should load faster after.
+
+A list of RPC URLs and their statuses can be found on [Chainlist](https://chainlist.org/chain/1116).
+
+### Connecting Your Wallet
+Now that we have our SolvBTC.CORE ready, head over to the Satoshi Perps dAPP and connect your wallet by clicking the "Connect Wallet" button at the top-right corner of the website.
+
+Connect Wallet button on the top-right of the website
+
+### Selecting a Market
+You can select your desired market by clicking on the Market dropdown located at the top-left of the candlestick chart. For this guide, we'll select the BTC/USD market.
+
+Selecting the BTC/USD market
+
+### Trading Form
+The trading form allows you to input your order details, such as side (Short/Long), type (Market/Limit/TP/SL), collateral size, trade size, and leverage. Once you've filled out the form, you can execute your trade order. You can find the trading form on the right side next to the candlestick chart.
+
+Trading form on the right side of the candlestick chart
+
+### Picking a Side
+When placing a trade in a perpetual contract, you have the option to "bet" on whether the price will go up or down. Select LONG if you're bullish or SHORT if you're bearish on the market you want to trade in.
+
+Bullish -> You think the price of something will go up.
+
+Bearish -> You think the price of something will go down.
+
+Selecting LONG or SHORT in the trading form
+
+For this trade, we selected to go LONG.
+
+### Order Type
+When placing an order, you can choose between different order types:
+
+- Market Order: Executes immediately at the current market price.
+- Limit Order: Executes at a specific price you set.
+- TP/SL Order: Take Profit (TP) and Stop Loss (SL) orders automatically close your open position at predefined profit or loss levels.
+
+Selecting order type: Market, Limit, or TP/SL
+
+### Collateral Size
+Collateral is the amount of SolvBTC.CORE you are willing to risk in your trade. On Satoshi Perps, you lock up your collateral per position, and you can retrieve it once you close your trade.
+
+Above the Collateral Size Input, you can see the Pay value, which represents the USD value of your inserted collateral.
+
+Next to the Collateral Size Input, there is the Collateral Asset selector, displaying the asset you're using as collateral for the trade (in this case, SolvBTC). You can use this to select different assets as collateral if available.
+
+Above the Collateral Asset, the Wallet Balance is displayed, showing how much of the asset (SolvBTC.CORE) you have available in your wallet.
+
+Inputting your collateral amount in SolvBTC.Core
+
+### Trade Size
+Trade size corresponds to the total amount you are longing or shorting. This determines the scale of your trade and influences your potential gains or losses. You can set the trade size directly, and it will adjust your collateral value based on your leverage multiplier.
+
+Above the Trade Size Input, you can see the directional side and USD value of the total trade.
+
+Next to the Trade Size Input, there is the Market Selector, which displays the market you are placing your trade in (in this case, BTC/USD). You can use it to switch to other available markets.
+
+Above the Market Selector, the Effective Leverage multiplier of the trade is displayed.
+
+Inputting your total trade size
+
+### Leverage
+Leverage allows you to amplify your trading position by borrowing additional funds. This means you can control a larger position with a smaller amount of your own capital. On Satoshi Perps, you can set leverage up to 250x. Use the slider or the input box above it to choose your desired leverage level.
+
+Setting how much leverage you want in your trade up to 250x with a slider or input box
+
+### Execute Trade
+Now that your order is all set, you can click on the "Long BTC" button to place your trade.
+
+An order summary will pop up, allowing you to review your order details and fees. If this is your first time using SolvBTC.CORE as collateral from this wallet on Satoshi Perps, you will need to sign a Spend Approval to enable the deposit of SolvBTC.CORE for your trade.
+
+Clicking the Allow BTC to be spent button
+
+Your wallet will prompt you to sign the spend approval, which won't incur any gas fees.
+
+Signing spend approval
+
+Once approved, you're all set to execute your trade and send it to the blockchain. Click on the "Long" button, which will open another prompt in your wallet to confirm the transaction and open your trade.
+
+In a few seconds, you should see your position opened and your trade live!
+
+Opened trade position
+
+Congratulations on your first trade on Satoshi Perps!
+
+### Positions
+How to manage your positions
+
+#### Closing your position
+There are many ways to close positions; we'll start with the easiest.
+
+**Liquidations**: So you don't know the market as well as you thought, that.s ok, you've hit your liquidation price and your position is now closed.
+
+**Market Close**: 
+
+1. Press the "Close" button on the far right of your position
+2. Enter the amount you would like to close or hit max to close the full position
+3. Finally use your wallet to confirm the transaction and close your position
+
+**TP/SL (Take Profit/Stop Loss)**
+
+TP/SL's allow you to automate closing your trade a a price you determine
+
+1. To set a TP/SL click on the tab below where you choose to long or short
+2. Enter the value of the position you want to close in the first field
+3. Enter the price you want to trigger your order in the second field
+4. Press the "Order" button
+5. Sign the transaction in your wallet
+
+Note that orders are not guaranteed to execute, this can occur in a few situations including but not exclusive to:
+
+- The mark price which is an aggregate of exchange prices did not reach the specified price
+- The specified price was reached but not long enough for it to be executed
+- The order's size exceeds the remaining position size
+- No keeper picked up the order for execution
+
+### Acquiring SolvBTC.CORE
+
+1. Buy BTCB on supported Dexes on the BNB Chain / Mint BTCB by withdrawing BTC to a BEP20 wallet
+
+2. Swap BTCB to SolvBTC.b on Solv Protocol (https://app.solv.finance/solvbtc?network=bnb-chain)
+
+3. Bridge SolvBTC.b from the BNB chain to Core via free bridges
+
+   a. Free Tunnel  (https://tunnel.free.tech/solvbtc.b)(Lock-mint bridge)
+   - Bridge duration: a few hours
+   - Bridge amount: minimum 1 SolvBTC.b
+   - Fees: gas fee only
+
+   b. Free Express (https://app.free.tech/?token=SolvBTC) (Liquidity bridge)
+   - Bridge duration: a few minutes
+   - Bridge amount: no limit, depends on liquidity
+   - Fees: a small % fee and gas fee
+
+4. Swap SolvBTC.b to SolvBTC.CORE on Solv Protocol (https://app.solv.finance/core)
+
+5. If you have SolvBTC.b, they can swap it to SolvBTC.CORE on BitFLUX too.https://bitflux.finance/swap
+
+6. You can simply swap $CORE for $SolvBTC.CORE through AKKA
+
+---
+title: 'How to Stake Liquidity'
+description: 'How SLP works'
+---
+
+# Overview
+
+SLP consists of an index of assets used for swaps and leverage trading. It can be minted using any index asset and burnt to redeem any index asset. The price for minting and redemption is calculated based on (total worth of assets in index including profits and losses of open positions) / (SLP supply).
+
+## SLP Token Addresses
+SLP-BTC:0xEcb695Bd80EFE0c7e1AB65895E338C22939F3808
+
+## Buying SLP
+SLP tokens can be bought using the Buy SLP page.
+
+CORE is required to send the buy transaction.
+
+## Selling SLP
+SLP tokens can be sold using the Sell SLP page.
+
+## Token Pricing
+There may be a spread for some index tokens; minting SLP will be based on the lower value of the index token and redeeming SLP will be based on the higher value of the index token.
+
+For stablecoin tokens, the spread will be from the Chainlink price of the stablecoin to 1 USD.
+
+The price of SLP will depend on the spread of the tokens in the pool as well.
+
+## Token Weights
+The fees to mint SLP, burn SLP, or to perform swaps will vary based on whether the action improves the balance of assets or reduces it. For example, if the index has a large percentage of CORE and a small percentage of USDC, actions which further increase the amount of CORE the index has will have a high fee while actions which reduce the amount of CORE the index has will have a low fee.
+
+The token weights can be seen on the Dashboard.
+
+Token weights are adjusted to help hedge SLP holders based on the open positions of traders. For example, if a lot of traders are long CORE, then CORE would have a higher token weight; if a lot of traders are short, then a higher token weight will be given to stablecoins.
+
+If token prices are increasing, then the price of SLP will increase as well, even if there is a larger number of open long positions on the platform. The portion reserved for long positions can be treated as stable in terms of its USD value since if prices increase, the profits from that portion will be used to pay traders, and if prices decrease, the losses of traders will keep the USD value of the reserve portion the same.
+
+If a lot of traders are short and larger weights are given to stablecoins, then SLP holders would have a synthetic exposure to the tokens being shorted, e.g., if CORE is being shorted then the price of SLP will decrease if the price of CORE decreases; if the price of CORE increases, then the price of SLP will increase from the losses of the short positions.
+
+## Risks
+Caution should be exercised when interacting with any smart contract or blockchain application. While risks are attempted to be mitigated through testing, audits, and bug bounties, there is always a risk of vulnerabilities in smart contract code.
+
+For details of contract operation please see Contracts V1.
+
+A non-exhaustive list of risks:
+
+- Smart contract risks
+- Counterparty risks: The SLP pool is the counterparty to traders; if traders make a profit, that comes from the value of the NLP pool
+- Token risks: Bridged tokens may depend on the security of the bridge; pegged tokens have risks of depegging
+
+### Step by Step Guide
+
+#### Funding Your Wallet
+Follow the guide found in
+
+How to Trade
+
+#### Connecting Your Wallet
+Now that we have our SolvBTC.CORE ready, head over to the Satoshi Perps dAPP and connect your wallet by clicking the "Connect Wallet" button at the top-right corner of the website.
+
+Connect Wallet button on the top-right of the website
+
+#### Navigate to Stake Liquidity
+To the right of the trade tab you will see "Stake Liquidity" simply click this to get to the staking liquidity page
+
+#### Choose your asset
+You can use various types of BTC, CORE, and USD stable coins to provide liquidity
+
+Click the asset you would like to stake and then click the "Stake with ____" button next to the asset
+
+For todays example we will be using SolvBTC
+
+#### Choose amount to stake
+on the right side you will see a Stake SLP tab
+
+Enter the amount you want to stake and then confirm in your wallet
+
+Next approve the asset you want to stake
+
+And confirm the approval in your wallet
+
+And finally click the Stake SLP button
+
+Just confirm in your wallet and you're officially staked!
+
+#### Viewing your stake
+You can see your balance in 2 places as seen below.
+
+### How to Unstake
+Simple step-by-step guide to unstaking liquidity on Satoshi Perps
+
+#### Navigate to Stake Liquidity
+To the right of the trade tab you will see "Stake Liquidity" simply click this to get to the staking liquidity page
+
+#### Choose your asset
+Click the asset you used before and enter the amount you would like to unstake.
+
+If you would like to unstake the full amount simply click the number next to the text saying "Available"
+
+Then click the "Unstake NLP" button. 
+
+#### Sign the Transaction
+You will get a pop-up in your wallet.
+
+Simply sign the transaction and now you have successfully unstaked.
+
+---
+title: 'Refferals'
+description: 'Satoshi perps referral program will offer users incentives to refer their friends!'
+---
+
+Traders who refer someone will receive tired discounts and rewards based on the number of active referred users.
+
+1-5 weekly active users referred will give you a 1.5% discount on trading fees as well as 1.5% of the referred users trading fees
+
+5-15 weekly active users referred will give you a 2.5% discount on trading fees as well as 2.5% of the referred users trading fees
+
+15+ weekly active users referred will give you a 5% discount on trading fees as well as 5% of the referred users trading fees
+
+Referring users will also give you a bonus multiplier on your airdrop based off of the number of referred users
+
 
 
