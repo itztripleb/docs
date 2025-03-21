@@ -1,0 +1,191 @@
+---
+title: 'VaultPriceFeed'
+description: 'Price oracle system for the Satoshi Perps protocol'
+---
+
+# VaultPriceFeed
+
+The VaultPriceFeed contract serves as the oracle system for the Satoshi Perps protocol, providing token prices for various operations such as position sizing, liquidation checks, and swap calculations.
+
+## Contract Overview
+
+The VaultPriceFeed handles:
+- Fetching token prices from multiple oracle sources
+- Validating and adjusting price data
+- Providing maximum and minimum prices with configurable spread
+- Supporting both chainlink and custom price feeds
+
+<Info>
+The VaultPriceFeed is a crucial component for the protocol as accurate price data is essential for fair position sizing, liquidations, and swaps.
+</Info>
+
+## Key Functions
+
+### Price Retrieval
+
+```solidity
+function getPrice(
+    address _token,
+    bool _maximise,
+    bool _includeAmmPrice,
+    bool _useSwapPricing
+) external view returns (uint256);
+```
+
+Returns the price of a token with various options for price calculation.
+
+```solidity
+function getPrimaryPrice(address _token, bool _maximise) public view returns (uint256);
+```
+
+Returns the primary price from the oracle without any adjustments.
+
+### Price Feed Configuration
+
+```solidity
+function setAdjustment(
+    address _token,
+    bool _isAdditive,
+    uint256 _adjustmentBps
+) external;
+```
+
+Sets a price adjustment for a token, either as an additive or multiplicative factor.
+
+```solidity
+function setSpreadBasisPoints(address _token, uint256 _spreadBasisPoints) external;
+```
+
+Sets the spread in basis points between the maximum and minimum price for a token.
+
+```solidity
+function setChainlinkPriceFeed(
+    address _token,
+    address _priceFeed
+) external;
+```
+
+Sets the Chainlink price feed address for a token.
+
+## Oracle Sources
+
+The VaultPriceFeed can use multiple sources for price data:
+
+1. **Chainlink Oracle**: The primary source for price data, known for its reliability and decentralization
+2. **Secondary Price Feeds**: Can be configured as backup or complementary price sources
+3. **AMM-based Pricing**: Can use prices derived from AMM pools (though typically less reliable)
+
+<Warning>
+The VaultPriceFeed prioritizes Chainlink oracles for price data. Secondary sources are only used when explicitly configured or when primary sources are unavailable.
+</Warning>
+
+## Price Adjustments
+
+The contract allows for price adjustments to handle various scenarios:
+
+```solidity
+function getAdjustedPrice(
+    address _token,
+    uint256 _price,
+    bool _maximise
+) public view returns (uint256);
+```
+
+Applies configured adjustments to a token's price:
+- If `_isAdditive` is true, adds or subtracts `_adjustmentBps` basis points
+- If `_isAdditive` is false, multiplies by `(10000 +/- _adjustmentBps) / 10000`
+- The sign depends on `_maximise` (plus for max price, minus for min price)
+
+## Spread Mechanism
+
+The price feed implements a spread mechanism that provides slightly different prices depending on the operation:
+
+- For buy operations, the `_maximise` parameter is set to `true`, returning a higher price
+- For sell operations, the `_maximise` parameter is set to `false`, returning a lower price
+
+This spread helps protect the protocol from sandwich attacks and provides a buffer for price movements.
+
+## Security Considerations
+
+The VaultPriceFeed implements several security features:
+- **Multiple Price Sources**: Can fall back to secondary sources if primary fails
+- **Price Validation**: Checks that prices are within reasonable ranges
+- **Admin Controls**: Only authorized addresses can update price feed configurations
+- **Spread Mechanism**: Creates a buffer against price manipulation
+
+<Note>
+The security of the price feed is critical to the overall security of the protocol. Any compromise in price data could potentially affect all protocol operations.
+</Note>
+
+## Integration with Vault
+
+The Vault contract uses the VaultPriceFeed for various operations:
+
+1. **Position Sizing**: Determines USD value of collateral and position sizes
+2. **Liquidation Checks**: Determines if positions are undercollateralized
+3. **Swap Calculations**: Determines exchange rates for token swaps
+4. **PnL Calculations**: Determines profit and loss for positions
+
+## Example Usage
+
+<Steps>
+  <Step title="Getting Token Price">
+    The Vault needs to get the price of ETH to calculate position value.
+    
+    ```javascript
+    // In the Vault contract
+    function getTokenPrice(address token, bool maximize) internal view returns (uint256) {
+        return vaultPriceFeed.getPrice(
+            token,
+            maximize,
+            false, // Don't include AMM price
+            false  // Don't use swap pricing
+        );
+    }
+    
+    // Getting ETH price for a long position
+    uint256 ethPrice = getTokenPrice(wethAddress, true);
+    ```
+  </Step>
+  <Step title="Configuring Price Feed">
+    An admin wants to set up a new token's price feed.
+    
+    ```javascript
+    // Set Chainlink price feed for TOKEN
+    await vaultPriceFeed.setChainlinkPriceFeed(
+      tokenAddress,
+      chainlinkPriceFeedAddress
+    );
+    
+    // Set a spread of 0.2% (20 basis points)
+    await vaultPriceFeed.setSpreadBasisPoints(
+      tokenAddress,
+      20
+    );
+    ```
+  </Step>
+  <Step title="Applying Price Adjustment">
+    During extreme market conditions, an admin applies a buffer to prices.
+    
+    ```javascript
+    // Add a 1% buffer to prices (100 basis points)
+    await vaultPriceFeed.setAdjustment(
+      tokenAddress,
+      true, // Additive adjustment
+      100   // 100 basis points (1%)
+    );
+    ```
+  </Step>
+</Steps>
+
+## Price Feed Failure Handling
+
+The VaultPriceFeed includes fallback mechanisms for handling price feed failures:
+
+1. If a Chainlink price feed fails, the contract can fall back to secondary price sources
+2. If all price feeds fail, the governance can update the price feeds or apply temporary adjustments
+3. In extreme cases, the protocol has circuit breakers to pause operations if price data is unavailable or unreliable
+
+<Warning>
+It is critical to monitor the health of price feeds, as inaccurate pricing can lead to unfair liquidations or allow exploitative trades.
+</Warning>

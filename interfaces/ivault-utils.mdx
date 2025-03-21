@@ -1,0 +1,85 @@
+---
+title: 'IVaultUtils'
+description: 'Interface for the VaultUtils contract'
+---
+
+# IVaultUtils Interface
+
+The `IVaultUtils` interface defines the functions available in the VaultUtils contract, which provides utility functions for the Vault including fee calculations, position validation, and funding rate updates.
+
+## Position Validation
+
+```solidity
+function validateLiquidation(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    bool _raise
+) external view returns (uint256, uint256);
+```
+Validates whether a position can be liquidated and returns liquidation information.
+
+## Fee Calculations
+
+```solidity
+function getPositionFee(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    uint256 _sizeDelta
+) external view returns (uint256);
+```
+Calculates the fee for increasing or decreasing a position.
+
+```solidity
+function getFundingFee(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    uint256 _size,
+    uint256 _entryFundingRate
+) external view returns (uint256);
+```
+Calculates the funding fee for a position based on its size and entry funding rate.
+
+```solidity
+function getFeeBasisPoints(
+    address _token,
+    uint256 _usdgDelta,
+    uint256 _feeBasisPoints,
+    uint256 _taxBasisPoints,
+    bool _increment
+) external view returns (uint256);
+```
+Calculates dynamic fee basis points based on token pool utilization.
+
+## Configuration
+
+```solidity
+function updateCumulativeFundingRate(
+    address _collateralToken,
+    address _indexToken
+) external returns (bool);
+```
+Updates the cumulative funding rate for a token pair.
+
+```solidity
+function setVault(address _vault) external;
+```
+Sets the address of the Vault contract.
+
+## Usage Notes
+
+- The VaultUtils contract is a companion to the main Vault, handling complex calculations and validations.
+- It helps keep the Vault code cleaner and more modular.
+- The contract is upgradeable separately from the main Vault, allowing improvements to fee calculations without changing the core Vault.
+- All interactions with VaultUtils typically flow through the Vault contract rather than being called directly by users.
+
+## Security Considerations
+
+- VaultUtils has access to the Vault's state, so its security is critical.
+- The fee calculations directly affect protocol economics and user experience.
+- Liquidation validation is a critical security component that protects the protocol from undercollateralized positions.

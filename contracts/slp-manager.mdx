@@ -1,0 +1,226 @@
+---
+title: 'SlpManager'
+description: 'Manages the SLP (Staked Liquidity Provider) token system'
+---
+
+# SlpManager
+
+The SlpManager contract manages the Staked Liquidity Provider (SLP) token system for the Satoshi Perps protocol. It handles the minting and burning of SLP tokens in exchange for providing liquidity to the protocol.
+
+<Note>
+For a visual representation of the liquidity provision process, see the [Protocol Flow Charts](/contracts/flow-charts) page.
+</Note>
+
+## Contract Overview
+
+The SlpManager handles:
+- Minting SLP tokens when users add liquidity
+- Burning SLP tokens when users remove liquidity
+- Tracking and distributing fees to liquidity providers
+- Managing the SLP token price based on underlying assets
+
+<Info>
+SLP tokens represent a user's share of the protocol's liquidity pool and entitle holders to a portion of protocol fees.
+</Info>
+
+## Key Functions
+
+### Liquidity Management
+
+```solidity
+function addLiquidity(
+    address _token,
+    uint256 _amount,
+    uint256 _minUsdg,
+    uint256 _minSlp
+) external returns (uint256);
+```
+
+Adds liquidity to the protocol and mints SLP tokens. Returns the amount of SLP tokens minted.
+
+```solidity
+function removeLiquidity(
+    address _tokenOut,
+    uint256 _slpAmount,
+    uint256 _minOut,
+    address _receiver
+) external returns (uint256);
+```
+
+Burns SLP tokens and returns the underlying assets.
+
+### AUM Calculation
+
+```solidity
+function getAum(bool _maximise) external view returns (uint256);
+```
+
+Calculates the total Assets Under Management (AUM) of the protocol.
+
+```solidity
+function getAumInUsdg(bool _maximise) external view returns (uint256);
+```
+
+Calculates the AUM in terms of USDG.
+
+### Price Calculation
+
+```solidity
+function getPrice(bool _maximise) external view returns (uint256);
+```
+
+Calculates the price of SLP tokens based on the AUM and total supply.
+
+### Fee Management
+
+```solidity
+function setCooldownDuration(uint256 _cooldownDuration) external;
+```
+
+Sets the cooldown duration for SLP token redemptions.
+
+```solidity
+function setAumAdjustment(uint256 _aumAddition, uint256 _aumDeduction) external;
+```
+
+Sets adjustments to the AUM calculation for accurate pricing.
+
+## SLP Token Mechanics
+
+The SLP token system works as follows:
+
+1. Users deposit tokens into the protocol through the SlpManager
+2. The SlpManager mints SLP tokens representing the user's share of the pool
+3. The value of SLP tokens increases as the protocol earns fees
+4. Users can redeem SLP tokens for the underlying assets plus earned fees
+
+<Warning>
+SLP tokens are subject to a cooldown period before they can be redeemed. This helps prevent flash loan attacks and provides stability to the protocol.
+</Warning>
+
+## AUM and Price Calculation
+
+The Assets Under Management (AUM) calculation is a critical component of SLP pricing:
+
+```solidity
+// Simplified AUM calculation
+AUM = poolValue + adjustmentAddition - adjustmentDeduction
+
+// SLP Price calculation
+SLPPrice = AUM / SLP_TotalSupply
+```
+
+The price of SLP tokens increases as:
+- The protocol earns fees, which are added to the pool
+- Profits from liquidations accrue to the pool
+- The value of assets in the pool increases
+
+## Integration with Vault
+
+The SlpManager is tightly integrated with the Vault contract:
+
+1. The Vault uses the liquidity provided through the SlpManager
+2. Fees earned by the Vault are distributed to SLP token holders
+3. The SlpManager helps maintain the stability of the protocol by providing liquidation reserves
+
+## Handler System and Private Mode
+
+The SlpManager implements a handler system and private mode for controlled access:
+
+```solidity
+mapping (address => bool) public isHandler;
+bool public inPrivateMode;
+```
+
+- **Handlers**: Addresses authorized to perform certain functions
+- **Private Mode**: When enabled, only authorized addresses can add/remove liquidity
+
+These features are controlled via:
+```solidity
+function setHandler(address _handler, bool _isActive) external;
+function setInPrivateMode(bool _inPrivateMode) external;
+```
+
+## ShortsTracker Integration
+
+The SlpManager integrates with the ShortsTracker contract to account for global short positions when calculating AUM:
+
+```solidity
+address public shortsTracker;
+function setShortsTracker(address _shortsTracker) external;
+```
+
+This integration ensures accurate tracking of protocol assets and liabilities.
+
+## Security Considerations
+
+The SlpManager implements several security features:
+- **Cooldown Period**: Prevents flash loan exploits
+- **Minimum Output Amounts**: Protects users from slippage
+- **AUM Adjustments**: Allows fine-tuning of SLP pricing
+- **Access Controls**: Restricts sensitive functions to authorized addresses
+- **Private Mode**: Ability to restrict liquidity operations to trusted addresses
+- **Handler System**: Fine-grained permissions for different functions
+
+## Example Usage
+
+<Steps>
+  <Step title="Adding Liquidity">
+    A user wants to provide liquidity to the protocol.
+    
+    ```javascript
+    // Amount of WETH to provide as liquidity
+    const liquidityAmount = ethers.utils.parseEther("10");
+    
+    // Approve SlpManager to use WETH
+    await weth.approve(slpManagerAddress, liquidityAmount);
+    
+    // Add liquidity
+    await slpManager.addLiquidity(
+      wethAddress, // Token to provide
+      liquidityAmount, // Amount to provide
+      ethers.utils.parseEther("9.5"), // Minimum USDG to receive
+      ethers.utils.parseEther("9.5") // Minimum SLP to receive (5% slippage)
+    );
+    ```
+  </Step>
+  <Step title="Checking SLP Value">
+    The user checks the value of their SLP tokens after some time.
+    
+    ```javascript
+    // Get SLP price
+    const slpPrice = await slpManager.getPrice(true);
+    
+    // Get user's SLP balance
+    const slpBalance = await slpToken.balanceOf(userAddress);
+    
+    // Calculate value in USD
+    const valueInUsd = slpPrice.mul(slpBalance).div(ethers.utils.parseEther("1"));
+    ```
+  </Step>
+  <Step title="Removing Liquidity">
+    Later, the user decides to withdraw their liquidity.
+    
+    ```javascript
+    // Amount of SLP tokens to redeem
+    const slpAmount = await slpToken.balanceOf(userAddress);
+    
+    // Remove liquidity
+    await slpManager.removeLiquidity(
+      wethAddress, // Token to receive
+      slpAmount, // SLP amount to burn
+      ethers.utils.parseEther("9.5"), // Minimum WETH to receive (5% slippage)
+      userAddress // Receiver address
+    );
+    ```
+  </Step>
+</Steps>
+
+## Fee Distribution
+
+SLP token holders earn fees in several ways:
+- Swap fees from token exchanges in the Vault
+- Borrowing fees from leveraged traders
+- Liquidation fees when underwater positions are liquidated
+
+These fees are automatically added to the pool value, increasing the redemption value of SLP tokens over time.

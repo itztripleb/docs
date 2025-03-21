@@ -1,0 +1,100 @@
+---
+title: 'ISlpManager'
+description: 'Interface for the SlpManager contract'
+---
+
+# ISlpManager Interface
+
+The `ISlpManager` interface defines the functions available in the SlpManager contract, which manages the Staked Liquidity Provider (SLP) token system for the Satoshi Perps protocol.
+
+## Liquidity Management
+
+```solidity
+function addLiquidity(
+    address _token,
+    uint256 _amount,
+    uint256 _minSlp,
+    uint256 _minToken
+) external returns (uint256);
+```
+Adds liquidity to the protocol and mints SLP tokens.
+
+```solidity
+function removeLiquidity(
+    address _tokenOut,
+    uint256 _slpAmount,
+    uint256 _minOut,
+    address _receiver
+) external returns (uint256);
+```
+Burns SLP tokens and returns the underlying assets.
+
+## AUM and Price Calculation
+
+```solidity
+function getAum(bool _maximise) external view returns (uint256);
+```
+Calculates the total Assets Under Management (AUM) of the protocol.
+
+```solidity
+function getAumInToken(bool _maximise) external view returns (uint256);
+```
+Calculates the AUM in terms of the pool token.
+
+```solidity
+function getSlpPrice(bool _maximise) external view returns (uint256);
+```
+Calculates the price of SLP tokens based on the AUM and total supply.
+
+## Fee and AUM Management
+
+```solidity
+function setCooldownDuration(uint256 _cooldownDuration) external;
+```
+Sets the cooldown duration for SLP token redemptions.
+
+```solidity
+function setAumAdjustment(uint256 _aumAddition, uint256 _aumDeduction) external;
+```
+Sets adjustments to the AUM calculation for accurate pricing.
+
+## State Access
+
+```solidity
+function cooldownDuration() external view returns (uint256);
+```
+Returns the cooldown duration for SLP token redemptions.
+
+```solidity
+function aumAddition() external view returns (uint256);
+```
+Returns the amount added to the AUM calculation.
+
+```solidity
+function aumDeduction() external view returns (uint256);
+```
+Returns the amount deducted from the AUM calculation.
+
+```solidity
+function slp() external view returns (address);
+```
+Returns the address of the SLP token.
+
+```solidity
+function vault() external view returns (address);
+```
+Returns the address of the Vault contract.
+
+## Usage Notes
+
+- The SlpManager acts as the minting and burning authority for SLP tokens.
+- Liquidity providers receive SLP tokens representing their share of the pool.
+- SLP tokens accrue value as the protocol earns fees.
+- Withdrawals are subject to a cooldown period to prevent flash loan attacks.
+- The AUM calculation determines the value backing SLP tokens, including assets in the Vault and any adjustments.
+
+## Security Considerations
+
+- The cooldown period protects the protocol from potential flash loan exploits.
+- AUM adjustments should be used carefully as they directly affect the price of SLP tokens.
+- Minimum output values protect users from slippage during liquidity operations.

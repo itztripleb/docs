@@ -1,0 +1,188 @@
+---
+title: 'ShortsTracker'
+description: 'Tracks global short positions across the protocol'
+---
+
+# ShortsTracker
+
+The ShortsTracker contract is a specialized component of the Satoshi Perps protocol that tracks global short positions. It maintains an accurate record of short position sizes and average prices, which is essential for funding rate calculations and protocol health monitoring.
+
+## Contract Overview
+
+The ShortsTracker handles:
+- Tracking global short position sizes for each token
+- Calculating average entry prices for short positions
+- Providing data for funding rate calculations
+- Ensuring accurate short interest accounting
+
+<Info>
+The ShortsTracker complements the Vault's native tracking of long positions by providing specialized tracking for short positions across the protocol.
+</Info>
+
+## Key Functions
+
+### Position Tracking
+
+```solidity
+function updateGlobalShortData(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    uint256 _sizeDelta,
+    uint256 _markPrice,
+    bool _isIncrease
+) external;
+```
+
+Updates the global short data when a position is increased or decreased. Only called by authorized handlers like the position managers.
+
+```solidity
+function getGlobalShortDelta(
+    address _token
+) external view returns (bool, uint256);
+```
+
+Calculates the global profit or loss for all short positions of a token.
+
+### State Access
+
+```solidity
+function globalShortSizes(address _token) external view returns (uint256);
+```
+
+Returns the total size of all short positions for a token. This function accesses data stored in the Vault contract rather than maintaining a separate copy.
+
+```solidity
+function globalShortAveragePrices(address _token) external view returns (uint256);
+```
+
+Returns the average entry price of all short positions for a token.
+
+### Administration
+
+```solidity
+function setIsGlobalShortDataReady(bool _value) external;
+```
+
+Sets whether the global short data is ready for use.
+
+```solidity
+function setHandler(address _handler, bool _isActive) external;
+```
+
+Sets or removes a handler that can update global short data.
+
+## Global Short Tracking Mechanism
+
+The ShortsTracker integrates with the Vault to access and track two key pieces of data for each token:
+1. **Global Short Size**: The total USD value of all short positions (stored in the Vault)
+2. **Global Short Average Price**: The average entry price of all short positions (stored in the Vault)
+
+When a short position is increased or decreased, the contract updates these values with the following logic:
+
+<Steps>
+  <Step title="Position Increase">
+    When a short position is increased, the tracker:
+    - Calculates the new global size by adding the position size delta
+    - Updates the average price based on the weighted average of existing positions and the new position
+    
+    ```solidity
+    if (prevSize == 0) {
+        averagePrice = markPrice;
+    } else {
+        averagePrice = (averagePrice * prevSize + markPrice * sizeDelta) / nextSize;
+    }
+    ```
+  </Step>
+  <Step title="Position Decrease">
+    When a short position is decreased, the tracker:
+    - Reduces the global size by the position size delta
+    - Maintains the average price (since decreasing positions doesn't change the average entry price)
+    
+    ```solidity
+    nextSize = prevSize - sizeDelta;
+    // Average price remains unchanged for decreases
+    ```
+  </Step>
+</Steps>
+
+## Integration with Vault and Other Contracts
+
+The ShortsTracker integrates with several core contracts:
+
+1. **Vault**: The Vault reads the global short data for funding rate calculations
+2. **PositionManager and PositionRouter**: These contracts notify the ShortsTracker when short positions change
+3. **BasePositionManager**: Acts as a handler to update the global short data
+
+This integration ensures that short position data is consistent across the protocol.
+
+## Security Considerations
+
+The ShortsTracker implements several security features:
+- **Access Control**: Only authorized handlers can update the global short data
+- **Data Validation**: Validates that size deltas and prices are reasonable
+- **Global State Management**: Provides a centralized source of truth for short position data
+
+<Warning>
+Accurate short position tracking is critical for proper funding rate calculations. Inaccuracies could lead to incorrect funding payments between longs and shorts.
+</Warning>
+
+## Example Usage
+
+```solidity
+// In a position manager contract
+function increaseShortPosition(address _account, address _collateralToken, address _indexToken, uint256 _sizeDelta, uint256 _price) external {
+    // Update global short data
+    shortsTracker.updateGlobalShortData(
+        _account,
+        _collateralToken,
+        _indexToken,
+        false, // isLong (false for shorts)
+        _sizeDelta,
+        _price,
+        true // isIncrease
+    );
+    
+    // Rest of position increase logic
+}
+
+// In a funding rate calculation
+function calculateFundingRate(address _token) external view returns (uint256) {
+    uint256 longSize = vault.globalLongSizes(_token);
+    uint256 shortSize = shortsTracker.globalShortSizes(_token);
+    
+    // Calculate imbalance between longs and shorts
+    int256 sizeChange = int256(longSize) - int256(shortSize);
+    
+    // Calculate funding rate based on imbalance
+    // ...
+}
+```
+
+## Data Migration and Readiness
+
+The ShortsTracker includes features for data migration and readiness:
+
+```solidity
+function setIsGlobalShortDataReady(bool _value) external;
+```
+
+This function allows governance to signal when the global short data is ready to be used for calculations. This is particularly useful during protocol upgrades or when recovering from emergency situations.
+
+```solidity
+function setInitData(
+    address[] memory _tokens,
+    uint256[] memory _averagePrices
+) external;
+```
+
+This function allows initializing global short data during contract deployment or migration from a previous version.
+
+## Benefits of Dedicated Short Tracking
+
+Having a dedicated ShortsTracker contract provides several benefits:
+1. **Specialized Logic**: Optimized for tracking short positions specifically
+2. **Gas Efficiency**: Reduces gas costs by separating short tracking from the main Vault
+3. **Easier Upgrades**: Can be upgraded independently of the core Vault contract
+4. **Better Reporting**: Provides clear data points for protocol monitoring and analytics

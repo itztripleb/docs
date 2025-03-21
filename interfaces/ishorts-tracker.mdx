@@ -1,0 +1,77 @@
+---
+title: 'IShortsTracker'
+description: 'Interface for the ShortsTracker contract'
+---
+
+# IShortsTracker Interface
+
+The `IShortsTracker` interface defines the functions available in the ShortsTracker contract, which tracks global short positions across the Satoshi Perps protocol.
+
+## Position Tracking
+
+```solidity
+function updateGlobalShortData(
+    address _token,
+    uint256 _sizeDelta,
+    uint256 _markPrice,
+    bool _isIncrease
+) external returns (uint256);
+```
+Updates the global short data when a position is increased or decreased.
+
+```solidity
+function getGlobalShortDelta(
+    address _token
+) external view returns (bool, uint256);
+```
+Calculates the global profit or loss for all short positions of a token.
+
+## State Access
+
+```solidity
+function globalShortSizes(address _token) external view returns (uint256);
+```
+Returns the total size of all short positions for a token.
+
+```solidity
+function globalShortAveragePrices(address _token) external view returns (uint256);
+```
+Returns the average entry price of all short positions for a token.
+
+```solidity
+function isGlobalShortDataReady() external view returns (bool);
+```
+Returns whether the global short data is ready for use.
+
+## Administration
+
+```solidity
+function setIsGlobalShortDataReady(bool _value) external;
+```
+Sets whether the global short data is ready for use.
+
+```solidity
+function setHandler(address _handler, bool _isActive) external;
+```
+Sets or removes a handler that can update global short data.
+
+```solidity
+function setInitData(
+    address[] memory _tokens,
+    uint256[] memory _averagePrices
+) external;
+```
+Initializes global short data during contract deployment or migration.
+
+## Usage Notes
+
+- The ShortsTracker complements the Vault's native tracking of long positions.
+- It provides specialized tracking for short positions across the protocol.
+- Only authorized handlers (like PositionManager and BasePositionManager) can update the global short data.
+- The global short data is essential for funding rate calculations and protocol monitoring.
+
+## Security Considerations
+
+- Access to update functions is restricted to prevent manipulation of short position data.
+- The readiness flag ensures that data isn't used before it's properly initialized.
+- Accurate short position tracking is critical for proper funding rate calculations.

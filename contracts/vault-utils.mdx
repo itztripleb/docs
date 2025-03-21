@@ -1,0 +1,197 @@
+---
+title: 'VaultUtils'
+description: 'Utility contract for Vault operations including fee calculation and position validation'
+---
+
+# VaultUtils
+
+The VaultUtils contract provides utility functions for the Vault, handling fee calculations, funding rate updates, and position validation. It serves as a companion contract to the main Vault, allowing for modular upgrades and improved code organization.
+
+## Contract Overview
+
+The VaultUtils handles:
+- Validation of position liquidations
+- Calculation of position fees
+- Calculation of funding fees
+- Dynamic fee adjustments based on pool utilization
+- Swap fee calculations
+
+<Info>
+The VaultUtils contract is designed to be upgradable separately from the main Vault, allowing for improvements to fee calculation and validation logic without changing the core Vault contract.
+</Info>
+
+## Key Functions
+
+### Liquidation Validation
+
+```solidity
+function validateLiquidation(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    bool _raise
+) external view returns (uint256, uint256);
+```
+
+Validates whether a position can be liquidated and returns liquidation information.
+
+### Fee Calculations
+
+```solidity
+function getPositionFee(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    uint256 _sizeDelta
+) external view returns (uint256);
+```
+
+Calculates the fee for increasing or decreasing a position.
+
+```solidity
+function getFundingFee(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    uint256 _size,
+    uint256 _entryFundingRate
+) external view returns (uint256);
+```
+
+Calculates the funding fee for a position based on its size and entry funding rate.
+
+```solidity
+function getFeeBasisPoints(
+    address _token,
+    uint256 _usdgDelta,
+    uint256 _feeBasisPoints,
+    uint256 _taxBasisPoints,
+    bool _increment
+) external view returns (uint256);
+```
+
+Calculates dynamic fee basis points based on token pool utilization.
+
+## Integration with Vault
+
+The VaultUtils is tightly integrated with the Vault contract:
+
+1. The Vault calls VaultUtils for fee calculations and position validations
+2. VaultUtils accesses the Vault's state to perform its calculations
+3. Only the Vault can set itself as the vault address in VaultUtils
+
+This separation of concerns allows:
+- More modular code organization
+- Easier upgradeability for fee calculations
+- Reduced complexity in the main Vault contract
+
+## Liquidation Mechanics
+
+The `validateLiquidation` function is a critical component for the protocol's position liquidation system:
+
+1. It checks if a position has sufficient collateral based on:
+   - Current leverage vs. maximum allowed leverage
+   - Position size and collateral
+   - Current market price
+   - Accrued funding fees
+
+2. It returns liquidation values including:
+   - Liquidation state (0 = cannot liquidate, 1 = can liquidate, 2 = can liquidate with high leverage)
+   - Margin fee amount
+
+<Warning>
+The liquidation validation logic is crucial for the protocol's security. It ensures positions are liquidated when they pose a risk to the protocol, while protecting users from unfair liquidations.
+</Warning>
+
+## Dynamic Fee System
+
+The VaultUtils implements a dynamic fee system that adjusts fees based on pool utilization:
+
+```
+if (poolAmount < targetAmount) {
+    // pool is imbalanced, increase the fee for actions that would further imbalance it
+    feeBasisPoints = feeBasisPoints + imbalanceFactor;
+} else {
+    // pool is balanced or over-balanced, decrease the fee for actions that would balance it
+    feeBasisPoints = feeBasisPoints - imbalanceFactor;
+}
+```
+
+This dynamic fee system helps:
+- Balance token pools by incentivizing balancing actions
+- Discourage actions that would imbalance pools
+- Provide price stability for token swaps
+
+## Security Considerations
+
+The VaultUtils implements several security features:
+- **Access Control**: Only the Vault contract can set itself as the vault address
+- **Parameter Validation**: Checks for reasonable values in fee calculations
+- **Liquidation Safety**: Validates liquidations based on multiple criteria
+- **Dynamic Fees**: Adjusts fees to protect the protocol from imbalances
+
+<Note>
+The VaultUtils contract cannot be directly accessed by users. All interactions flow through the main Vault contract.
+</Note>
+
+## Example: Fee Calculation Flow
+
+<Steps>
+  <Step title="Position Increase Request">
+    When a user requests to increase a position, the Vault calls VaultUtils for fee calculation.
+    
+    ```solidity
+    // In Vault contract
+    function increasePosition(...) external {
+        // Calculate position fee
+        uint256 fee = vaultUtils.getPositionFee(
+            _account,
+            _collateralToken,
+            _indexToken,
+            _isLong,
+            _sizeDelta
+        );
+        
+        // Deduct fee from collateral
+        collateral = collateral.sub(fee);
+        
+        // Rest of position increase logic
+    }
+    ```
+  </Step>
+  <Step title="Fee Calculation">
+    The VaultUtils calculates the fee based on the position size and fee configuration.
+    
+    ```solidity
+    // In VaultUtils contract
+    function getPositionFee(...) public view returns (uint256) {
+        // Get base fee in basis points
+        uint256 feeBasisPoints = vault.marginFeeBasisPoints();
+        
+        // Calculate fee amount
+        uint256 feeAmount = _sizeDelta.mul(feeBasisPoints).div(BASIS_POINTS_DIVISOR);
+        
+        return feeAmount;
+    }
+    ```
+  </Step>
+  <Step title="Funding Fee Calculation">
+    When a position is decreased, the Vault calls VaultUtils to calculate funding fees.
+    
+    ```solidity
+    // In VaultUtils contract
+    function getFundingFee(...) public view returns (uint256) {
+        // Current cumulative funding rate
+        uint256 fundingRate = vault.cumulativeFundingRates(_collateralToken);
+        
+        // Calculate funding fee based on rate change
+        uint256 fundingFee = _size.mul(fundingRate.sub(_entryFundingRate)).div(FUNDING_RATE_PRECISION);
+        
+        return fundingFee;
+    }
+    ```
+  </Step>
+</Steps>

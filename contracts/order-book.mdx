@@ -1,0 +1,291 @@
+---
+title: 'OrderBook'
+description: 'Manages limit orders for creating, modifying, and closing positions'
+---
+
+# OrderBook
+
+The OrderBook contract enables limit orders for the Satoshi Perps protocol, allowing traders to create conditional orders that execute when specific price conditions are met. It supports increase, decrease, and swap orders.
+
+<Note>
+For a visual representation of the order execution process, see the [Protocol Flow Charts](/contracts/flow-charts) page.
+</Note>
+
+## Contract Overview
+
+The OrderBook handles:
+- Creating and managing limit orders for positions
+- Tracking orders until they meet execution conditions
+- Executing orders when price conditions are met
+- Cancelling orders that are no longer needed
+- Collecting and distributing execution fees
+
+<Info>
+Unlike the PositionRouter which executes orders immediately, the OrderBook executes orders when specified price conditions are met.
+</Info>
+
+## Key Functions
+
+### Order Creation
+
+```solidity
+function createIncreaseOrder(
+    address[] memory _path,
+    uint256 _amountIn,
+    address _indexToken,
+    uint256 _minOut,
+    uint256 _sizeDelta,
+    address _collateralToken,
+    bool _isLong,
+    uint256 _triggerPrice,
+    bool _triggerAboveThreshold,
+    uint256 _executionFee,
+    bool _shouldWrap
+) external payable;
+```
+
+Creates a limit order to increase a position when the price reaches the trigger price.
+
+```solidity
+function createDecreaseOrder(
+    address _indexToken,
+    uint256 _sizeDelta,
+    address _collateralToken,
+    uint256 _collateralDelta,
+    bool _isLong,
+    uint256 _triggerPrice,
+    bool _triggerAboveThreshold,
+    uint256 _executionFee
+) external payable;
+```
+
+Creates a limit order to decrease a position when the price reaches the trigger price.
+
+```solidity
+function createSwapOrder(
+    address[] memory _path,
+    uint256 _amountIn,
+    uint256 _minOut,
+    uint256 _triggerRatio, 
+    bool _triggerAboveThreshold,
+    uint256 _executionFee,
+    bool _shouldWrap,
+    bool _shouldUnwrap
+) external payable;
+```
+
+Creates a limit order to swap tokens when the exchange rate reaches the trigger ratio.
+
+### Order Cancellation
+
+```solidity
+function cancelIncreaseOrder(uint256 _orderIndex) external;
+```
+
+Cancels a pending increase position order.
+
+```solidity
+function cancelDecreaseOrder(uint256 _orderIndex) external;
+```
+
+Cancels a pending decrease position order.
+
+```solidity
+function cancelSwapOrder(uint256 _orderIndex) external;
+```
+
+Cancels a pending swap order.
+
+### Order Execution
+
+```solidity
+function executeIncreaseOrder(
+    address _account,
+    uint256 _orderIndex,
+    address payable _executionFeeReceiver
+) external;
+```
+
+Executes an increase position order when the trigger condition is met.
+
+```solidity
+function executeDecreaseOrder(
+    address _account,
+    uint256 _orderIndex,
+    address payable _executionFeeReceiver
+) external;
+```
+
+Executes a decrease position order when the trigger condition is met.
+
+```solidity
+function executeSwapOrder(
+    address _account,
+    uint256 _orderIndex,
+    address payable _executionFeeReceiver
+) external;
+```
+
+Executes a swap order when the trigger condition is met.
+
+## Order Types and Mechanics
+
+The OrderBook supports three primary order types:
+
+### 1. Increase Position Orders
+
+These orders allow traders to open or add to positions when the price reaches a specified level:
+
+- **Long positions**: Orders can be set to execute when the price goes above or below a threshold
+  - Use `triggerAboveThreshold = false` for "buy low" orders (execute when price falls to target)
+  - Use `triggerAboveThreshold = true` for breakout orders (execute when price rises above target)
+
+- **Short positions**: Orders work in the reverse manner
+  - Use `triggerAboveThreshold = true` for "sell high" orders (execute when price rises to target)
+  - Use `triggerAboveThreshold = false` for breakdown orders (execute when price falls below target)
+
+### 2. Decrease Position Orders
+
+These orders allow traders to reduce or close positions when the price reaches a specified level:
+
+- **Take profit orders**: Set trigger price above entry for longs, below entry for shorts
+- **Stop loss orders**: Set trigger price below entry for longs, above entry for shorts
+
+### 3. Swap Orders
+
+Swap orders allow traders to exchange tokens when a price ratio is met:
+
+- The trigger is based on the ratio between the output and input token
+- Orders execute when the price ratio crosses the trigger threshold
+
+## Triggering Mechanism
+
+The OrderBook's triggering mechanism works as follows:
+
+1. Each order specifies a trigger price and whether the order should execute above or below that price
+2. When the order is created, an execution fee is collected to incentivize keepers
+3. Keepers monitor the price and execute orders when conditions are met
+4. The execution checks the current price against the trigger condition:
+   ```solidity
+   bool shouldExecute = _triggerAboveThreshold ? currentPrice > triggerPrice : currentPrice < triggerPrice;
+   ```
+
+## Integration with Position Managers
+
+The OrderBook integrates with the PositionManager to execute position changes:
+
+1. When an increase order is executed, the OrderBook:
+   - Transfers tokens from the OrderBook to the PositionManager
+   - Calls the PositionManager's increasePosition function
+
+2. When a decrease order is executed, the OrderBook:
+   - Calls the PositionManager's decreasePosition function
+   - Handles token transfers back to the user
+
+## Fee Mechanism
+
+The OrderBook collects execution fees to incentivize keepers to monitor and execute orders:
+
+- Users include an execution fee when creating an order
+- The fee is refunded if the order is cancelled
+- When an order is executed, the fee is sent to the keeper who executed it
+
+<Warning>
+If the execution fee is too low, orders may not be executed in a timely manner as they would be unprofitable for keepers.
+</Warning>
+
+## Security Considerations
+
+The OrderBook includes several security features:
+
+- **Access Controls**: Only the order creator can cancel their own orders
+- **Price Validation**: Execution only occurs when price conditions are met
+- **Slippage Protection**: Minimum output amounts protect users from excessive slippage
+- **Execution Fee Mechanism**: Ensures keepers are incentivized to execute orders
+- **Administrative Controls**: Allows updates to the minimum execution fee
+
+## Example: Take Profit and Stop Loss Setup
+
+<Steps>
+  <Step title="Create a Long ETH Position">
+    First, a trader opens a long ETH position through the PositionRouter.
+    
+    ```javascript
+    // Position details:
+    // - 5 ETH collateral
+    // - 5x leverage
+    // - Entry price: $2000 per ETH
+    ```
+  </Step>
+  <Step title="Set Take Profit Order">
+    The trader sets a take profit order to trigger when ETH reaches $2500.
+    
+    ```javascript
+    // Create a decrease order to close the entire position at $2500
+    await orderBook.createDecreaseOrder(
+      wethAddress, // indexToken
+      ethers.utils.parseUnits("25", 30), // sizeDelta (full position size)
+      wethAddress, // collateralToken
+      ethers.utils.parseEther("5"), // collateralDelta (full collateral)
+      true, // isLong
+      ethers.utils.parseUnits("2500", 30), // triggerPrice
+      true, // triggerAboveThreshold (execute when price goes above $2500)
+      ethers.utils.parseEther("0.01"), // executionFee
+      { value: ethers.utils.parseEther("0.01") } // Pay execution fee
+    );
+    ```
+  </Step>
+  <Step title="Set Stop Loss Order">
+    The trader also sets a stop loss order to trigger if ETH falls to $1800.
+    
+    ```javascript
+    // Create a decrease order to close the entire position at $1800
+    await orderBook.createDecreaseOrder(
+      wethAddress, // indexToken
+      ethers.utils.parseUnits("25", 30), // sizeDelta (full position size)
+      wethAddress, // collateralToken
+      ethers.utils.parseEther("5"), // collateralDelta (full collateral)
+      true, // isLong
+      ethers.utils.parseUnits("1800", 30), // triggerPrice
+      false, // triggerAboveThreshold (execute when price goes below $1800)
+      ethers.utils.parseEther("0.01"), // executionFee
+      { value: ethers.utils.parseEther("0.01") } // Pay execution fee
+    );
+    ```
+  </Step>
+  <Step title="Order Execution by Keepers">
+    Keepers monitor the orders and execute them when conditions are met.
+    
+    ```javascript
+    // When ETH price reaches $2500, a keeper executes the take profit order
+    await orderBook.executeDecreaseOrder(
+      traderAddress, // account
+      0, // orderIndex
+      keeperAddress // executionFeeReceiver
+    );
+    
+    // If the stop loss is no longer needed (take profit executed), 
+    // the trader can cancel it
+    await orderBook.cancelDecreaseOrder(1);
+    ```
+  </Step>
+</Steps>
+
+## Practical Applications
+
+The OrderBook enables several trading strategies:
+
+<CardGroup cols={2}>
+  <Card title="Range Trading" icon="arrows-up-down">
+    Set buy orders at support levels and sell orders at resistance levels
+  </Card>
+  <Card title="Breakout Trading" icon="chart-line">
+    Set orders to execute when price breaks through significant levels
+  </Card>
+  <Card title="DCA Strategy" icon="calendar">
+    Create multiple orders at different price levels to average in/out of positions
+  </Card>
+  <Card title="Automated Risk Management" icon="shield">
+    Set stop loss and take profit orders automatically for each position
+  </Card>
+</CardGroup>

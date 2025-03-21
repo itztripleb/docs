@@ -1,0 +1,201 @@
+---
+title: 'IPositionRouter'
+description: 'Interface for the PositionRouter contract'
+---
+
+# IPositionRouter Interface
+
+The `IPositionRouter` interface defines the functions available in the PositionRouter contract, which manages the queuing and execution of position requests in the Satoshi Perps protocol.
+
+## Position Creation
+
+### Increase Positions
+
+```solidity
+function createIncreasePosition(
+    address[] memory _path,
+    address _indexToken,
+    uint256 _amountIn,
+    uint256 _minOut,
+    uint256 _sizeDelta,
+    bool _isLong,
+    uint256 _acceptablePrice,
+    uint256 _executionFee,
+    bytes32 _referralCode,
+    address _callbackTarget
+) external payable returns (bytes32);
+```
+Creates a request to increase a position.
+
+```solidity
+function createIncreasePositionETH(
+    address[] memory _path,
+    address _indexToken,
+    uint256 _minOut,
+    uint256 _sizeDelta,
+    bool _isLong,
+    uint256 _acceptablePrice,
+    uint256 _executionFee,
+    bytes32 _referralCode,
+    address _callbackTarget
+) external payable returns (bytes32);
+```
+Creates a request to increase a position using ETH as the input token.
+
+### Decrease Positions
+
+```solidity
+function createDecreasePosition(
+    address[] memory _path,
+    address _indexToken,
+    uint256 _collateralDelta,
+    uint256 _sizeDelta,
+    bool _isLong,
+    address _receiver,
+    uint256 _acceptablePrice,
+    uint256 _minOut,
+    uint256 _executionFee,
+    bool _withdrawETH,
+    address _callbackTarget
+) external payable returns (bytes32);
+```
+Creates a request to decrease a position.
+
+## Position Execution
+
+```solidity
+function executeIncreasePosition(bytes32 _key, address _executionFeeReceiver) external;
+```
+Executes a queued increase position request.
+
+```solidity
+function executeDecreasePosition(bytes32 _key, address _executionFeeReceiver) external;
+```
+Executes a queued decrease position request.
+
+```solidity
+function executeIncreasePositions(uint256 _endIndex, address payable _executionFeeReceiver) external;
+```
+Executes multiple increase position requests in a single transaction.
+
+```solidity
+function executeDecreasePositions(uint256 _endIndex, address payable _executionFeeReceiver) external;
+```
+Executes multiple decrease position requests in a single transaction.
+
+## Request Cancellation
+
+```solidity
+function cancelIncreasePosition(bytes32 _key, address payable _executionFeeReceiver) external;
+```
+Cancels a pending increase position request.
+
+```solidity
+function cancelDecreasePosition(bytes32 _key, address payable _executionFeeReceiver) external;
+```
+Cancels a pending decrease position request.
+
+## Request Query
+
+```solidity
+function getRequestQueueLengths() external view returns (uint256, uint256, uint256, uint256);
+```
+Returns the lengths of the request queues (increase queue, decrease queue, already processed increase requests, already processed decrease requests).
+
+```solidity
+function getIncreasePositionRequestPath(bytes32 _key) external view returns (address[] memory);
+```
+Returns the token path for an increase position request.
+
+```solidity
+function getDecreasePositionRequestPath(bytes32 _key) external view returns (address[] memory);
+```
+Returns the token path for a decrease position request.
+
+## Configuration
+
+```solidity
+function setPositionKeeper(address _account, bool _isActive) external;
+```
+Sets or removes a position keeper who can execute position requests.
+
+```solidity
+function setMinExecutionFee(uint256 _minExecutionFee) external;
+```
+Sets the minimum execution fee required for position requests.
+
+```solidity
+function setIsLeverageEnabled(bool _isLeverageEnabled) external;
+```
+Sets whether leverage trading is enabled.
+
+```solidity
+function setDelayValues(uint256 _minBlockDelayKeeper, uint256 _minTimeDelayPublic, uint256 _maxTimeDelay) external;
+```
+Sets the delay values for position execution.
+
+```solidity
+function setRequestKeysStartValues(uint256 _increasePositionRequestKeysStart, uint256 _decreasePositionRequestKeysStart) external;
+```
+Sets the starting values for request keys.
+
+## Callback System
+
+```solidity
+function callbackFunction(bytes32 positionKey, bool isExecuted, bool isIncrease) external;
+```
+Callback function called after a position is executed or fails to execute.
+
+## State Access
+
+```solidity
+function increasePositionRequests(bytes32 _key) external view returns (
+    address account,
+    address[] memory path,
+    address indexToken,
+    uint256 amountIn,
+    uint256 minOut,
+    uint256 sizeDelta,
+    bool isLong,
+    uint256 acceptablePrice,
+    uint256 executionFee,
+    uint256 blockNumber,
+    uint256 blockTime,
+    bool isETH,
+    bytes32 callbackContract
+);
+```
+Returns details about an increase position request.
+
+```solidity
+function decreasePositionRequests(bytes32 _key) external view returns (
+    address account,
+    address[] memory path,
+    address indexToken,
+    uint256 collateralDelta,
+    uint256 sizeDelta,
+    bool isLong,
+    address receiver,
+    uint256 acceptablePrice,
+    uint256 minOut,
+    uint256 executionFee,
+    uint256 blockNumber,
+    uint256 blockTime,
+    bool isETH,
+    bytes32 callbackContract
+);
+```
+Returns details about a decrease position request.
+
+## Usage Notes
+
+- Position requests are added to a queue and executed by keepers or the public after a delay.
+- Each request requires an execution fee to incentivize keepers to execute it.
+- The PositionRouter uses a callback system to notify external contracts when positions are executed.
+- Requests have a maximum execution time window, after which they can be cancelled.
+
+## Security Considerations
+
+- Ensure acceptable price parameters are set appropriately to avoid unexpected execution at unfavorable prices
+- The execution fee should be sufficient to cover gas costs, otherwise requests may not be executed
+- Consider the delay between request creation and execution when setting acceptable prices

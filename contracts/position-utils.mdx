@@ -1,0 +1,106 @@
+---
+title: 'PositionUtils'
+description: 'Utility library for position management operations'
+---
+
+# PositionUtils
+
+The PositionUtils is a library contract that provides utility functions for position management across the Satoshi Perps protocol. It encapsulates common position-related logic for reuse across different contracts.
+
+## Contract Overview
+
+The PositionUtils handles:
+- Utility functions for fee calculations
+- Helper functions for position operations
+- Standardized implementations of common position logic
+
+<Info>
+As a library, PositionUtils does not store state and is designed to be used by other contracts.
+</Info>
+
+## Key Functions
+
+### Fee Utilities
+
+```solidity
+function shouldDeductFee(
+    address _account,
+    address _router,
+    address[] memory _path,
+    uint256 _amountIn,
+    address _indexToken,
+    bool _isLong
+) external view returns (bool);
+```
+
+Determines whether a deposit fee should be charged to prevent zero-fee swaps.
+
+### Position Operations
+
+```solidity
+function increasePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    uint256 _sizeDelta,
+    bool _isLong,
+    uint256 _price
+) external;
+```
+
+Standard implementation for increasing a position with validation.
+
+## Usage in Other Contracts
+
+The PositionUtils library is utilized by various contracts in the Satoshi Perps protocol:
+
+1. **BasePositionManager**: Uses utility functions for position operations
+2. **PositionManager**: Inherits position utility functions through BasePositionManager
+3. **PositionRouter**: Uses fee utility functions to determine fee application
+
+## Implementation Details
+
+### Fee Deduction Logic
+
+The `shouldDeductFee` function implements the following logic:
+- If the path length is 1 (no swap), check if amountIn is greater than 0
+- If it's a long position with collateral token same as index token, no fee
+- For all other cases, apply the fee
+
+This logic helps prevent users from avoiding fees through complex transaction paths.
+
+## Integration Example
+
+Here's how the PositionUtils library is typically used in other contracts:
+
+```solidity
+// In a position management contract
+function increasePosition(/* parameters */) external {
+    bool shouldChargeFee = PositionUtils.shouldDeductFee(
+        msg.sender,
+        router,
+        path,
+        amountIn,
+        indexToken,
+        isLong
+    );
+    
+    if (shouldChargeFee) {
+        // Apply fee logic
+    }
+    
+    // Proceed with position increase
+}
+```
+
+## Benefits of Library Approach
+
+Using a library for position utilities offers several advantages:
+- **Code Reusability**: Common logic is defined once and reused across contracts
+- **Gas Efficiency**: Library code is deployed once and shared by all contracts
+- **Consistency**: Ensures uniform behavior across different contract implementations
+- **Maintainability**: Changes to the utility functions need to be made in only one place
+
+<Note>
+Library contracts like PositionUtils help maintain consistent behavior across the protocol and make the codebase more maintainable.
+</Note>

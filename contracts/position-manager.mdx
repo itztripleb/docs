@@ -1,0 +1,250 @@
+---
+title: 'PositionManager'
+description: 'Manages position creation, execution, and liquidation with role-based access control'
+---
+
+# PositionManager
+
+The PositionManager contract extends BasePositionManager with user-facing functionality for position management. It includes role-based access control for position execution and liquidation.
+
+## Contract Overview
+
+The PositionManager handles:
+- Direct creation, modification, and liquidation of positions
+- Execution of orders from the OrderBook
+- Role-based access control for different operations
+- Integration with the OrderBook for limit orders
+
+<Info>
+The PositionManager provides direct position execution functionality, as opposed to the queue-based approach of the PositionRouter.
+</Info>
+
+## Key Functions
+
+### Position Management
+
+```solidity
+function increasePosition(
+    address[] memory _path,
+    address _indexToken,
+    uint256 _amountIn,
+    uint256 _minOut,
+    uint256 _sizeDelta,
+    bool _isLong,
+    uint256 _price
+) external;
+```
+
+Increases a position with the specified parameters.
+
+```solidity
+function increasePositionETH(
+    address[] memory _path,
+    address _indexToken,
+    uint256 _minOut,
+    uint256 _sizeDelta,
+    bool _isLong,
+    uint256 _price
+) external payable;
+```
+
+Increases a position using ETH as the input token.
+
+```solidity
+function decreasePosition(
+    address _collateralToken,
+    address _indexToken,
+    uint256 _collateralDelta,
+    uint256 _sizeDelta,
+    bool _isLong,
+    address _receiver,
+    uint256 _price
+) external;
+```
+
+Decreases a position with the specified parameters.
+
+```solidity
+function decreasePositionETH(
+    address _collateralToken,
+    address _indexToken,
+    uint256 _collateralDelta,
+    uint256 _sizeDelta,
+    bool _isLong,
+    address payable _receiver,
+    uint256 _price
+) external;
+```
+
+Decreases a position and receives ETH instead of WETH.
+
+### Liquidation
+
+```solidity
+function liquidatePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    address _feeReceiver
+) external;
+```
+
+Liquidates a position if it meets the liquidation criteria.
+
+### Order Execution
+
+```solidity
+function executeIncreaseOrder(
+    address _account,
+    uint256 _orderIndex,
+    address payable _feeReceiver
+) external;
+```
+
+Executes an increase order from the OrderBook.
+
+```solidity
+function executeDecreaseOrder(
+    address _account,
+    uint256 _orderIndex,
+    address payable _feeReceiver
+) external;
+```
+
+Executes a decrease order from the OrderBook.
+
+## Access Control
+
+The PositionManager implements several access control mechanisms:
+
+```solidity
+function setOrderKeeper(address _account, bool _isActive) external;
+```
+
+Sets or removes an order keeper who can execute orders.
+
+```solidity
+function setLiquidator(address _account, bool _isActive) external;
+```
+
+Sets or removes a liquidator who can liquidate positions.
+
+```solidity
+function setPartner(address _account, bool _isActive) external;
+```
+
+Sets or removes a partner who can place orders for their users.
+
+```solidity
+function setInLegacyMode(bool _inLegacyMode) external;
+```
+
+Sets the contract to legacy mode, which affects access control.
+
+## Validation
+
+```solidity
+function setShouldValidateIncreaseOrder(bool _shouldValidateIncreaseOrder) external;
+```
+
+Sets whether increase orders should be validated before execution.
+
+```solidity
+function shouldValidateIncreaseOrder() external view returns (bool);
+```
+
+Returns whether increase orders should be validated.
+
+## Integration with OrderBook
+
+The PositionManager is tightly integrated with the OrderBook contract:
+
+```solidity
+function setOrderBook(address _orderBook) external;
+```
+
+Sets the OrderBook contract address.
+
+```solidity
+function orderBook() external view returns (address);
+```
+
+Returns the OrderBook contract address.
+
+## Security Considerations
+
+The PositionManager implements several security features:
+- **Role-Based Access Control**: Different roles for order execution and liquidation
+- **Price Validation**: Ensures that positions are executed at reasonable prices
+- **Integration Validation**: Validates interaction with other contracts
+- **Error Handling**: Comprehensive error handling for various failure scenarios
+
+<Warning>
+Only approved liquidators can liquidate positions when in private liquidation mode.
+</Warning>
+
+## Example Usage
+
+<Steps>
+  <Step title="Increasing a Position">
+    A trader wants to open a 5x long ETH position with 1 ETH as collateral.
+    
+    ```javascript
+    // Price to use for execution
+    const ethPrice = ethers.utils.parseUnits("2000", 30);
+    
+    // Increase position parameters
+    await positionManager.increasePositionETH(
+      [wethAddress], // Path (no token swap)
+      wethAddress, // Index token (ETH)
+      0, // Min output (no swap)
+      ethers.utils.parseUnits("5", 30), // Size delta (5x leverage)
+      true, // Is long
+      ethPrice, // Price to use
+      { value: ethers.utils.parseEther("1") } // 1 ETH as collateral
+    );
+    ```
+  </Step>
+  <Step title="Decreasing a Position">
+    Later, the trader wants to close half of the position.
+    
+    ```javascript
+    // Price to use for execution
+    const ethPrice = ethers.utils.parseUnits("2100", 30);
+    
+    // Decrease position parameters
+    await positionManager.decreasePositionETH(
+      wethAddress, // Collateral token
+      wethAddress, // Index token
+      ethers.utils.parseEther("0.5"), // Withdraw half of the collateral
+      ethers.utils.parseUnits("2.5", 30), // Size delta (half position size)
+      true, // Is long
+      userAddress, // Receiver
+      ethPrice // Price to use
+    );
+    ```
+  </Step>
+  <Step title="Executing an Order">
+    An order keeper notices a pending increase order that meets its execution conditions.
+    
+    ```javascript
+    // Order keeper executes the order
+    await positionManager.executeIncreaseOrder(
+      userAddress, // Account that created the order
+      0, // Order index
+      keeperAddress // Fee receiver
+    );
+    ```
+  </Step>
+</Steps>
+
+## Legacy Mode
+
+The PositionManager includes a legacy mode feature:
+
+```solidity
+function setInLegacyMode(bool _inLegacyMode) external;
+```
+
+In legacy mode, certain access control restrictions are relaxed, making the PositionManager backward compatible with earlier versions. This feature is typically used during protocol upgrades when necessary to maintain compatibility.

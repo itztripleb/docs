@@ -1,0 +1,136 @@
+---
+title: 'IRouter'
+description: 'Interface for the Router contract'
+---
+
+# IRouter Interface
+
+The `IRouter` interface defines the functions available in the Router contract, which serves as a central entry point for user interactions with the Satoshi Perps protocol.
+
+## Plugin Management
+
+```solidity
+function addPlugin(address _plugin) external;
+```
+Allows users to register a plugin that can execute actions on their behalf.
+
+```solidity
+function removePlugin(address _plugin) external;
+```
+Removes a previously registered plugin.
+
+```solidity
+function approvePlugin(address _plugin) external;
+```
+Approves a plugin to use the user's tokens via the Router.
+
+```solidity
+function pluginTransfer(
+    address _token,
+    address _account,
+    address _receiver,
+    uint256 _amount
+) external;
+```
+Transfers tokens from an account to a receiver, can only be called by an approved plugin.
+
+```solidity
+function pluginIncreasePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    uint256 _sizeDelta,
+    bool _isLong
+) external;
+```
+Increases a position for an account, can only be called by an approved plugin.
+
+```solidity
+function pluginDecreasePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    uint256 _collateralDelta,
+    uint256 _sizeDelta,
+    bool _isLong,
+    address _receiver
+) external returns (uint256);
+```
+Decreases a position for an account, can only be called by an approved plugin.
+
+## Token Operations
+
+```solidity
+function approvePlugin(address _token, address _spender) external;
+```
+Approves a specific token to be spent by the specified spender.
+
+```solidity
+function swap(
+    address[] memory _path,
+    uint256 _amountIn,
+    uint256 _minOut,
+    address _receiver
+) external;
+```
+Swaps tokens through the Vault's swap mechanism.
+
+```solidity
+function swapETHToTokens(
+    address[] memory _path,
+    uint256 _minOut,
+    address _receiver
+) external payable;
+```
+Swaps ETH to tokens through the Vault's swap mechanism.
+
+```solidity
+function swapTokensToETH(
+    address[] memory _path,
+    uint256 _amountIn,
+    uint256 _minOut,
+    address _receiver
+) external;
+```
+Swaps tokens to ETH through the Vault's swap mechanism.
+
+## ETH Handling
+
+```solidity
+function unwrapETH(uint256 _amount, address _receiver) external;
+```
+Unwraps WETH to ETH and sends it to the specified receiver.
+
+```solidity
+function directPoolDeposit(address _token, uint256 _amount) external;
+```
+Deposits tokens directly to the liquidity pool in the Vault.
+
+```solidity
+function sendETHToVault(uint256 _amount) external;
+```
+Converts ETH to WETH and sends it to the Vault.
+
+## Access Verification
+
+```solidity
+function plugins(address _account, address _plugin) external view returns (bool);
+```
+Returns whether a plugin is registered for an account.
+
+```solidity
+function approvedPlugins(address _account, address _plugin) external view returns (bool);
+```
+Returns whether a plugin is approved for an account.
+
+## Usage Notes
+
+- Before a plugin can execute actions on behalf of a user, the user must first register it using `addPlugin()` and then approve it using `approvePlugin()`.
+- The Router delegates actual execution to the Vault but serves as a security layer and convenience wrapper.
+- ETH handling functions provide convenience methods for working with ETH in a WETH-based system.
+
+## Security Considerations
+
+- Only approved plugins can execute actions on behalf of users
+- Users should only approve trusted plugins as they will have significant control over the user's funds
+- The Router does not hold user funds; it merely facilitates transfers and approvals

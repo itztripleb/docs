@@ -1,0 +1,107 @@
+---
+title: 'IVaultPriceFeed'
+description: 'Interface for the VaultPriceFeed contract'
+---
+
+# IVaultPriceFeed Interface
+
+The `IVaultPriceFeed` interface defines the functions available in the VaultPriceFeed contract, which serves as the price oracle system for the Satoshi Perps protocol.
+
+## Price Retrieval
+
+```solidity
+function getPrice(
+    address _token,
+    bool _maximise,
+    bool _includeAmmPrice,
+    bool _useSwapPricing
+) external view returns (uint256);
+```
+Returns the price of a token with various options for price calculation.
+
+```solidity
+function getPrimaryPrice(address _token, bool _maximise) external view returns (uint256);
+```
+Returns the primary price from the oracle without any adjustments.
+
+## Price Feed Configuration
+
+```solidity
+function setAdjustment(
+    address _token,
+    bool _isAdditive,
+    uint256 _adjustmentBps
+) external;
+```
+Sets a price adjustment for a token, either as an additive or multiplicative factor.
+
+```solidity
+function setSpreadBasisPoints(address _token, uint256 _spreadBasisPoints) external;
+```
+Sets the spread in basis points between the maximum and minimum price for a token.
+
+```solidity
+function setChainlinkPriceFeed(
+    address _token,
+    address _priceFeed
+) external;
+```
+Sets the Chainlink price feed address for a token.
+
+```solidity
+function setSecondaryPriceFeed(address _secondaryPriceFeed) external;
+```
+Sets the address of the secondary price feed.
+
+## Price Adjustment Access
+
+```solidity
+function adjustmentBasisPoints(address _token) external view returns (uint256);
+```
+Returns the adjustment basis points for a token.
+
+```solidity
+function isAdjustmentAdditive(address _token) external view returns (bool);
+```
+Returns whether the adjustment for a token is additive or multiplicative.
+
+```solidity
+function spreadBasisPoints(address _token) external view returns (uint256);
+```
+Returns the spread basis points for a token.
+
+## Price Feed Access
+
+```solidity
+function chainlinkPriceFeed(address _token) external view returns (address);
+```
+Returns the Chainlink price feed address for a token.
+
+```solidity
+function secondaryPriceFeed() external view returns (address);
+```
+Returns the address of the secondary price feed.
+
+## Price Calculation
+
+```solidity
+function getAdjustedPrice(
+    address _token,
+    uint256 _price,
+    bool _maximise
+) external view returns (uint256);
+```
+Applies configured adjustments to a token's price.
+
+## Usage Notes
+
+- The VaultPriceFeed serves as the central price oracle for the Satoshi Perps protocol.
+- It prioritizes Chainlink oracles but can fall back to secondary sources.
+- Price adjustments and spreads can be configured per token.
+- The `_maximise` parameter determines whether to return the maximum or minimum price based on the spread.
+
+## Security Considerations
+
+- Price data is critical for the protocol's security, as it affects position sizing, liquidations, and swaps.
+- Chainlink oracles are preferred for their reliability and decentralization.
+- Adjustments should be used carefully as they directly affect pricing throughout the protocol.

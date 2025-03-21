@@ -1,0 +1,85 @@
+---
+title: 'IPositionRouterCallbackReceiver'
+description: 'Interface for receiving callbacks from the PositionRouter'
+---
+
+# IPositionRouterCallbackReceiver Interface
+
+The `IPositionRouterCallbackReceiver` interface defines the function that contracts must implement to receive callbacks from the PositionRouter when positions are executed or failed to execute.
+
+## Callback Function
+
+```solidity
+function gmxPositionCallback(
+    bytes32 positionKey,
+    bool isExecuted,
+    bool isIncrease
+) external;
+```
+
+This function is called by the PositionRouter after a position request has been processed. The parameters provide information about the position and its execution status:
+
+- `positionKey`: The unique identifier for the position request
+- `isExecuted`: Whether the position was successfully executed (true) or failed (false)
+- `isIncrease`: Whether this was an increase position request (true) or a decrease position request (false)
+
+## Implementation Requirements
+
+Contracts implementing this interface must:
+
+1. Handle both successful and failed position executions
+2. Be able to identify the original request using the positionKey
+3. Implement appropriate security measures to verify that the caller is the legitimate PositionRouter
+4. Not revert in the callback function, as this would prevent position execution
+
+## Example Implementation
+
+```solidity
+contract PositionManagerWithNotifications is IPositionRouterCallbackReceiver {
+    address public positionRouter;
+    mapping(bytes32 => bool) public positionExecutions;
+    
+    constructor(address _positionRouter) {
+        positionRouter = _positionRouter;
+    }
+    
+    modifier onlyPositionRouter() {
+        require(msg.sender == positionRouter, "Only PositionRouter");
+        _;
+    }
+    
+    function gmxPositionCallback(
+        bytes32 positionKey,
+        bool isExecuted,
+        bool isIncrease
+    ) external override onlyPositionRouter {
+        // Record the execution result
+        positionExecutions[positionKey] = isExecuted;
+        
+        // Emit an event for off-chain tracking
+        emit PositionCallback(positionKey, isExecuted, isIncrease);
+        
+        // Perform any additional logic based on the execution result
+        if (isExecuted) {
+            // Handle successful execution
+        } else {
+            // Handle failed execution
+        }
+    }
+    
+    event PositionCallback(bytes32 indexed positionKey, bool isExecuted, bool isIncrease);
+}
+```
+
+## Usage Notes
+
+- The callback mechanism allows for building more complex systems on top of the Satoshi Perps protocol, such as conditional orders, automated position management, and risk management systems.
+- When creating a position through the PositionRouter, specify your contract's address as the `_callbackTarget` parameter to receive the callback.
+- The callback is called after the position execution attempt, regardless of whether it succeeded or failed.
+
+## Security Considerations
+
+- Always validate that the caller is the expected PositionRouter to prevent unauthorized callbacks.
+- Do not perform excessive operations in the callback function, as this could lead to high gas costs or out-of-gas errors.
+- The callback should be designed to handle both successful and failed executions gracefully.
+- No critical operations should rely solely on the callback being called, as in extreme cases, the callback might not be triggered.

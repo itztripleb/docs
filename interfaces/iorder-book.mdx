@@ -1,0 +1,212 @@
+---
+title: 'IOrderBook'
+description: 'Interface for the OrderBook contract'
+---
+
+# IOrderBook Interface
+
+The `IOrderBook` interface defines the functions available in the OrderBook contract, which manages limit orders for the Satoshi Perps protocol.
+
+## Order Creation
+
+### Increase Position Orders
+
+```solidity
+function createIncreaseOrder(
+    address[] memory _path,
+    uint256 _amountIn,
+    address _indexToken,
+    uint256 _minOut,
+    uint256 _sizeDelta,
+    address _collateralToken,
+    bool _isLong,
+    uint256 _triggerPrice,
+    bool _triggerAboveThreshold,
+    uint256 _executionFee,
+    bool _shouldWrap
+) external payable;
+```
+Creates a limit order to increase a position when the price reaches the trigger price.
+
+### Decrease Position Orders
+
+```solidity
+function createDecreaseOrder(
+    address _indexToken,
+    uint256 _sizeDelta,
+    address _collateralToken,
+    uint256 _collateralDelta,
+    bool _isLong,
+    uint256 _triggerPrice,
+    bool _triggerAboveThreshold,
+    uint256 _executionFee
+) external payable;
+```
+Creates a limit order to decrease a position when the price reaches the trigger price.
+
+### Swap Orders
+
+```solidity
+function createSwapOrder(
+    address[] memory _path,
+    uint256 _amountIn,
+    uint256 _minOut,
+    uint256 _triggerRatio,
+    bool _triggerAboveThreshold,
+    uint256 _executionFee,
+    bool _shouldWrap
+) external payable;
+```
+Creates a limit order to swap tokens when the exchange rate reaches the trigger ratio.
+
+## Order Cancellation
+
+```solidity
+function cancelIncreaseOrder(uint256 _orderIndex) external;
+```
+Cancels a pending increase position order.
+
+```solidity
+function cancelDecreaseOrder(uint256 _orderIndex) external;
+```
+Cancels a pending decrease position order.
+
+```solidity
+function cancelSwapOrder(uint256 _orderIndex) external;
+```
+Cancels a pending swap order.
+
+## Order Execution
+
+```solidity
+function executeIncreaseOrder(
+    address _account,
+    uint256 _orderIndex,
+    address payable _executionFeeReceiver
+) external;
+```
+Executes an increase position order when the trigger condition is met.
+
+```solidity
+function executeDecreaseOrder(
+    address _account,
+    uint256 _orderIndex,
+    address payable _executionFeeReceiver
+) external;
+```
+Executes a decrease position order when the trigger condition is met.
+
+```solidity
+function executeSwapOrder(
+    address _account,
+    uint256 _orderIndex,
+    address payable _executionFeeReceiver
+) external;
+```
+Executes a swap order when the trigger condition is met.
+
+## Order Access
+
+```solidity
+function getIncreaseOrder(
+    address _account,
+    uint256 _orderIndex
+) external view returns (
+    address[] memory path,
+    uint256 amountIn,
+    address indexToken,
+    uint256 minOut,
+    uint256 sizeDelta,
+    address collateralToken,
+    bool isLong,
+    uint256 triggerPrice,
+    bool triggerAboveThreshold,
+    uint256 executionFee
+);
+```
+Returns the details of an increase position order.
+
+```solidity
+function getDecreaseOrder(
+    address _account,
+    uint256 _orderIndex
+) external view returns (
+    address indexToken,
+    uint256 sizeDelta,
+    address collateralToken,
+    uint256 collateralDelta,
+    bool isLong,
+    uint256 triggerPrice,
+    bool triggerAboveThreshold,
+    uint256 executionFee
+);
+```
+Returns the details of a decrease position order.
+
+```solidity
+function getSwapOrder(
+    address _account,
+    uint256 _orderIndex
+) external view returns (
+    address[] memory path,
+    uint256 amountIn,
+    uint256 minOut,
+    uint256 triggerRatio,
+    bool triggerAboveThreshold,
+    uint256 executionFee,
+    bool shouldUnwrap
+);
+```
+Returns the details of a swap order.
+
+## Configuration
+
+```solidity
+function setMinExecutionFee(uint256 _minExecutionFee) external;
+```
+Sets the minimum execution fee required for orders.
+
+```solidity
+function setMinPurchaseTokenAmountUsd(uint256 _minPurchaseTokenAmountUsd) external;
+```
+Sets the minimum purchase token amount in USD.
+
+```solidity
+function setPositionManager(address _positionManager) external;
+```
+Sets the address of the PositionManager contract.
+
+## State Access
+
+```solidity
+function increaseOrdersIndex(address _account) external view returns (uint256);
+```
+Returns the number of increase orders for an account.
+
+```solidity
+function decreaseOrdersIndex(address _account) external view returns (uint256);
+```
+Returns the number of decrease orders for an account.
+
+```solidity
+function swapOrdersIndex(address _account) external view returns (uint256);
+```
+Returns the number of swap orders for an account.
+
+```solidity
+function minExecutionFee() external view returns (uint256);
+```
+Returns the minimum execution fee required for orders.
+
+## Usage Notes
+
+- Orders are triggered when the price or ratio conditions are met.
+- Each order requires an execution fee to incentivize keepers to execute it.
+- For increase orders with token swaps, the path should include the tokens to swap through.
+- The `triggerAboveThreshold` parameter determines if the order should execute when the price goes above or below the trigger price.
+
+## Security Considerations
+
+- Ensure trigger prices are set appropriately to avoid unexpected execution
+- The execution fee should be sufficient to cover gas costs, otherwise orders may not be executed
+- For increase orders, ensure sufficient tokens are approved or sent with the transaction

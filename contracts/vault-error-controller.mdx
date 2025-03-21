@@ -1,0 +1,147 @@
+---
+title: 'VaultErrorController'
+description: 'Manages error messages for the Vault contract'
+---
+
+# VaultErrorController
+
+The VaultErrorController is a utility contract that manages error messages for the Vault contract. It provides a way to associate error codes with human-readable error messages, improving the user experience when transactions fail.
+
+## Contract Overview
+
+The VaultErrorController handles:
+- Storing error messages for specific error codes
+- Providing a centralized place for error message management
+- Allowing for error message updates without modifying the main Vault code
+
+<Info>
+The VaultErrorController is primarily an administrative contract that helps with developer and user experience, rather than core protocol functionality.
+</Info>
+
+## Key Functions
+
+### Error Management
+
+```solidity
+function setErrors(
+    uint256[] memory _errorCodes,
+    string[] memory _errors
+) external;
+```
+
+Sets error messages for multiple error codes at once.
+
+```solidity
+function getError(uint256 _errorCode) external view returns (string memory);
+```
+
+Returns the error message for a specific error code.
+
+## Purpose and Benefits
+
+The VaultErrorController serves several important purposes:
+
+1. **Improved Developer Experience**: By using error codes in the Vault with corresponding human-readable messages, debugging becomes easier
+2. **Gas Efficiency**: The Vault can use compact error codes rather than storing long error strings
+3. **Upgradability**: Error messages can be updated without changing the core Vault contract
+4. **Standardization**: Creates a consistent error reporting system across the protocol
+
+## Integration with Vault
+
+The Vault contract interacts with the VaultErrorController when errors occur:
+
+```solidity
+// In Vault contract
+if (condition) {
+    revert(vaultErrorController.getError(ERROR_CODE));
+}
+```
+
+This pattern allows the Vault to focus on its core logic while delegating error message management to the VaultErrorController.
+
+## Error Code Pattern
+
+The protocol uses a standardized error code system:
+
+- Error codes are unsigned integers, typically starting from 1
+- Each error code corresponds to a specific error condition
+- Error messages are human-readable strings that explain the error
+
+For example:
+- Error code 1: "Vault: invalid _amount"
+- Error code 2: "Vault: token not whitelisted"
+- Error code 3: "Vault: _collateralToken not whitelisted"
+
+## Administrative Control
+
+Only the contract owner (typically the governance) can update error messages:
+
+```solidity
+function setErrors(
+    uint256[] memory _errorCodes,
+    string[] memory _errors
+) external onlyOwner {
+    // Set error messages
+}
+```
+
+This ensures that error messages remain consistent and accurate.
+
+## Example Usage
+
+<Steps>
+  <Step title="Setting Error Messages">
+    The governance wants to set up error messages for the Vault.
+    
+    ```javascript
+    // Error codes and corresponding messages
+    const errorCodes = [1, 2, 3, 4];
+    const errorMessages = [
+      "Vault: invalid _amount",
+      "Vault: token not whitelisted",
+      "Vault: _collateralToken not whitelisted",
+      "Vault: _indexToken not shortable"
+    ];
+    
+    // Set error messages
+    await vaultErrorController.setErrors(errorCodes, errorMessages);
+    ```
+  </Step>
+  <Step title="Vault Using Error Messages">
+    The Vault contract uses error codes when validating operations.
+    
+    ```solidity
+    // In Vault's increasePosition function
+    if (!whitelistedTokens[_collateralToken]) {
+        revert(errors[3]); // "Vault: _collateralToken not whitelisted"
+    }
+    
+    if (!shortableTokens[_indexToken] && !_isLong) {
+        revert(errors[4]); // "Vault: _indexToken not shortable"
+    }
+    ```
+  </Step>
+  <Step title="Updating Error Messages">
+    Later, the governance decides to update some error messages for clarity.
+    
+    ```javascript
+    // Update a specific error message
+    await vaultErrorController.setErrors(
+      [4],
+      ["Vault: this token cannot be shorted"]
+    );
+    ```
+  </Step>
+</Steps>
+
+## Security Considerations
+
+The VaultErrorController has minimal security implications since it only manages error messages and doesn't affect the core functionality of the protocol. However, there are still a few considerations:
+
+- **Access Control**: Only the owner should be able to update error messages
+- **Message Consistency**: Error messages should accurately reflect the corresponding error conditions
+- **Gas Efficiency**: Error messages should be concise to minimize gas costs when they're used
+
+<Note>
+While error messages don't affect the security of the protocol directly, accurate and clear error messages are important for usability and can help prevent user mistakes.
+</Note>

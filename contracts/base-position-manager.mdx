@@ -1,0 +1,179 @@
+---
+title: 'BasePositionManager'
+description: 'Base contract for managing positions with safety checks'
+---
+
+# BasePositionManager
+
+The BasePositionManager is an abstract contract that serves as the foundation for position management in the Satoshi Perps protocol. It provides core functionality for increasing and decreasing positions with safety checks and fee management.
+
+## Contract Overview
+
+The BasePositionManager handles:
+- Basic position management operations
+- Validation of position parameters
+- Fee collection for position adjustments
+- Integration with the ShortsTracker for short position monitoring
+- Global position size limits
+
+<Info>
+The BasePositionManager is designed to be extended by specialized position manager contracts.
+</Info>
+
+## Key Functions
+
+### Core Position Functions
+
+```solidity
+function _increasePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    uint256 _sizeDelta,
+    bool _isLong,
+    uint256 _price
+) internal;
+```
+
+Internal function to increase a position with validation.
+
+```solidity
+function _decreasePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    uint256 _collateralDelta,
+    uint256 _sizeDelta,
+    bool _isLong,
+    address _receiver,
+    uint256 _price
+) internal returns (uint256);
+```
+
+Internal function to decrease a position with validation.
+
+### Position Validation
+
+```solidity
+function _validateMaxGlobalSize(
+    address _indexToken,
+    bool _isLong,
+    uint256 _sizeDelta
+) internal view;
+```
+
+Validates that a position does not exceed the global size limit for a token.
+
+### Fee Management
+
+```solidity
+function _collectFees(
+    address _account,
+    address[] memory _path,
+    uint256 _amountIn,
+    address _indexToken,
+    bool _isLong,
+    uint256 _sizeDelta
+) internal returns (uint256);
+```
+
+Collects fees for position adjustments based on the deposit fee rate and whether a fee should be deducted.
+
+```solidity
+function _transferOutETHWithGasLimitFallbackToWeth(uint256 _amountOut, address payable _receiver) internal;
+```
+
+Transfers ETH to a receiver with a gas limit. If the transfer fails due to gas limitations, it will fall back to sending WETH instead.
+
+### Token Swapping
+
+```solidity
+function _swap(address[] memory _path, uint256 _minOut, address _receiver) internal returns (uint256);
+```
+
+Executes a token swap through the Router.
+
+## Integration Points
+
+The BasePositionManager integrates with several core contracts:
+- **Vault**: For position storage and management
+- **Router**: For plugin authorization and token swaps
+- **ShortsTracker**: For tracking global short positions
+- **ReferralStorage**: For handling affiliate referrals
+
+## Global Size Limits
+
+The BasePositionManager implements limits on the maximum global position size:
+
+```solidity
+function setMaxGlobalSizes(
+    address[] memory _tokens,
+    uint256[] memory _longSizes,
+    uint256[] memory _shortSizes
+) external;
+```
+
+Sets the maximum global long and short sizes for a list of tokens.
+
+```solidity
+function maxGlobalLongSizes(address _token) external view returns (uint256);
+```
+
+Returns the maximum global long size for a token.
+
+```solidity
+function maxGlobalShortSizes(address _token) external view returns (uint256);
+```
+
+Returns the maximum global short size for a token.
+
+## Fee Configuration
+
+```solidity
+function setDepositFee(uint256 _depositFee) external;
+```
+
+Sets the deposit fee basis points.
+
+```solidity
+function depositFee() external view returns (uint256);
+```
+
+Returns the current deposit fee basis points.
+
+## Security Considerations
+
+The BasePositionManager includes several security features:
+- **Access Control**: Only authorized plugins can execute position changes
+- **Position Validation**: Ensures positions do not exceed global limits
+- **Fee Handling**: Properly accounts for fees in position calculations
+- **Error Handling**: Includes proper error messages for various failure cases
+
+<Note>
+As a base contract, BasePositionManager is not meant to be used directly by users, but rather extended by more specialized position managers.
+</Note>
+
+## Inheritance and Extension
+
+The BasePositionManager is designed to be inherited by concrete implementations like PositionManager. When extending BasePositionManager, implementers should:
+
+1. Implement user-facing methods for position management
+2. Add appropriate access controls
+3. Implement any additional specialized functionality
+
+Example extension pattern:
+
+```solidity
+contract PositionManager is BasePositionManager {
+    // User-facing methods
+    function increasePosition(/* parameters */) external {
+        // Validation logic
+        _increasePosition(/* parameters */);
+    }
+    
+    function decreasePosition(/* parameters */) external {
+        // Validation logic
+        _decreasePosition(/* parameters */);
+    }
+}
+```

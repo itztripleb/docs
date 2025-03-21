@@ -1,0 +1,556 @@
+---
+title: 'IVault'
+description: 'Interface for the Vault contract'
+---
+
+# IVault Interface
+
+The `IVault` interface defines the functions available in the Vault contract, which serves as the core of the Satoshi Perps protocol. The Vault manages all positions, collateral, swaps, and protocol fees.
+
+## State Access Functions
+
+### Basic Configuration
+
+```solidity
+function isInitialized() external view returns (bool);
+```
+Returns whether the Vault has been initialized.
+
+```solidity
+function isLeverageEnabled() external view returns (bool);
+```
+Returns whether leverage trading is enabled.
+
+```solidity
+function router() external view returns (address);
+```
+Returns the address of the Router contract.
+
+```solidity
+function usdg() external view returns (address);
+```
+Returns the address of the USDG token.
+
+```solidity
+function gov() external view returns (address);
+```
+Returns the address of the governance controller.
+
+```solidity
+function whitelistedTokenCount() external view returns (uint256);
+```
+Returns the number of whitelisted tokens.
+
+```solidity
+function maxLeverage() external view returns (uint256);
+```
+Returns the maximum allowed leverage.
+
+### Protocol Configuration
+
+```solidity
+function minProfitTime() external view returns (uint256);
+```
+Returns the minimum time positions must be held for profits to be recognized.
+
+```solidity
+function hasDynamicFees() external view returns (bool);
+```
+Returns whether the protocol uses dynamic fee adjustments.
+
+```solidity
+function fundingInterval() external view returns (uint256);
+```
+Returns the interval for funding rate updates.
+
+```solidity
+function totalTokenWeights() external view returns (uint256);
+```
+Returns the sum of all token weights.
+
+```solidity
+function getTargetUsdgAmount(address _token) external view returns (uint256);
+```
+Returns the target USDG amount for a token based on its weight.
+
+### Mode Settings
+
+```solidity
+function inManagerMode() external view returns (bool);
+```
+Returns whether the Vault is in manager mode (restricted operations).
+
+```solidity
+function inPrivateLiquidationMode() external view returns (bool);
+```
+Returns whether the Vault is in private liquidation mode.
+
+```solidity
+function maxGasPrice() external view returns (uint256);
+```
+Returns the maximum gas price for certain operations.
+
+### Access and Roles
+
+```solidity
+function approvedRouters(address _account, address _router) external view returns (bool);
+```
+Returns whether a router is approved for an account.
+
+```solidity
+function isLiquidator(address _account) external view returns (bool);
+```
+Returns whether an account is authorized as a liquidator.
+
+```solidity
+function isManager(address _account) external view returns (bool);
+```
+Returns whether an account is authorized as a manager.
+
+### Token Configurations
+
+```solidity
+function minProfitBasisPoints(address _token) external view returns (uint256);
+```
+Returns the minimum profit basis points for a token.
+
+```solidity
+function tokenBalances(address _token) external view returns (uint256);
+```
+Returns the actual token balance in the contract.
+
+```solidity
+function lastFundingTimes(address _token) external view returns (uint256);
+```
+Returns the last time funding was updated for a token.
+
+### Token State
+
+```solidity
+function tokenDecimals(address _token) external view returns (uint256);
+```
+Returns the decimals for a token.
+
+```solidity
+function tokenWeights(address _token) external view returns (uint256);
+```
+Returns the weight for a token.
+
+```solidity
+function guaranteedUsd(address _token) external view returns (uint256);
+```
+Returns the USD value guaranteed to be available for a token.
+
+```solidity
+function poolAmounts(address _token) external view returns (uint256);
+```
+Returns the amount of tokens in the pool.
+
+```solidity
+function bufferAmounts(address _token) external view returns (uint256);
+```
+Returns the buffer amount for a token.
+
+```solidity
+function reservedAmounts(address _token) external view returns (uint256);
+```
+Returns the reserved amount for a token.
+
+```solidity
+function usdgAmounts(address _token) external view returns (uint256);
+```
+Returns the USDG amount for a token.
+
+```solidity
+function maxUsdgAmounts(address _token) external view returns (uint256);
+```
+Returns the maximum USDG amount for a token.
+
+### Token Lists
+
+```solidity
+function allWhitelistedTokensLength() external view returns (uint256);
+```
+Returns the number of whitelisted tokens.
+
+```solidity
+function allWhitelistedTokens(uint256) external view returns (address);
+```
+Returns the whitelisted token at the specified index.
+
+```solidity
+function whitelistedTokens(address _token) external view returns (bool);
+```
+Returns whether a token is whitelisted.
+
+```solidity
+function stableTokens(address _token) external view returns (bool);
+```
+Returns whether a token is a stablecoin.
+
+```solidity
+function shortableTokens(address _token) external view returns (bool);
+```
+Returns whether a token can be shorted.
+
+### Fees and Rates
+
+```solidity
+function feeReserves(address _token) external view returns (uint256);
+```
+Returns the fee reserves for a token.
+
+```solidity
+function fundingRateFactor() external view returns (uint256);
+```
+Returns the funding rate factor for non-stable tokens.
+
+```solidity
+function stableFundingRateFactor() external view returns (uint256);
+```
+Returns the funding rate factor for stable tokens.
+
+```solidity
+function cumulativeFundingRates(address _token) external view returns (uint256);
+```
+Returns the cumulative funding rate for a token.
+
+```solidity
+function getNextFundingRate(address _token) external view returns (uint256);
+```
+Returns the next funding rate for a token.
+
+```solidity
+function liquidationFeeUsd() external view returns (uint256);
+```
+Returns the liquidation fee in USD.
+
+```solidity
+function taxBasisPoints() external view returns (uint256);
+```
+Returns the tax basis points.
+
+```solidity
+function stableTaxBasisPoints() external view returns (uint256);
+```
+Returns the stable tax basis points.
+
+```solidity
+function mintBurnFeeBasisPoints() external view returns (uint256);
+```
+Returns the mint burn fee basis points.
+
+```solidity
+function swapFeeBasisPoints() external view returns (uint256);
+```
+Returns the swap fee basis points.
+
+```solidity
+function stableSwapFeeBasisPoints() external view returns (uint256);
+```
+Returns the stable swap fee basis points.
+
+```solidity
+function marginFeeBasisPoints() external view returns (uint256);
+```
+Returns the margin fee basis points.
+
+### Shorts State
+
+```solidity
+function globalShortSizes(address _token) external view returns (uint256);
+```
+Returns the global short size for a token.
+
+```solidity
+function globalShortAveragePrices(address _token) external view returns (uint256);
+```
+Returns the global short average price for a token.
+
+```solidity
+function maxGlobalShortSizes(address _token) external view returns (uint256);
+```
+Returns the maximum global short size for a token.
+
+### Open Interest Tracking
+
+```solidity
+function maxLongOpenInterest(address _token) external view returns (uint256);
+```
+Returns the maximum allowed open interest for long positions of a token.
+
+```solidity
+function maxShortOpenInterest(address _token) external view returns (uint256);
+```
+Returns the maximum allowed open interest for short positions of a token.
+
+```solidity
+function longOpenInterest(address _token) external view returns (uint256);
+```
+Returns the current total open interest for long positions of a token.
+
+```solidity
+function shortOpenInterest(address _token) external view returns (uint256);
+```
+Returns the current total open interest for short positions of a token.
+
+## Configuration Functions
+
+### Core Configuration
+
+```solidity
+function setVaultUtils(IVaultUtils _vaultUtils) external;
+```
+Sets the VaultUtils contract address.
+
+```solidity
+function setError(uint256 _errorCode, string calldata _error) external;
+```
+Sets an error message for an error code.
+
+```solidity
+function setMaxLeverage(uint256 _maxLeverage) external;
+```
+Sets the maximum leverage.
+
+```solidity
+function setInManagerMode(bool _inManagerMode) external;
+```
+Sets whether the Vault is in manager mode.
+
+```solidity
+function setManager(address _manager, bool _isManager) external;
+```
+Sets or removes a manager.
+
+```solidity
+function setIsLeverageEnabled(bool _isLeverageEnabled) external;
+```
+Sets whether leverage trading is enabled.
+
+```solidity
+function setMaxGasPrice(uint256 _maxGasPrice) external;
+```
+Sets the maximum gas price.
+
+```solidity
+function setInPrivateLiquidationMode(bool _inPrivateLiquidationMode) external;
+```
+Sets whether the Vault is in private liquidation mode.
+
+```solidity
+function setLiquidator(address _liquidator, bool _isActive) external;
+```
+Sets or removes a liquidator.
+
+### Token Configuration
+
+```solidity
+function setTokenConfig(
+    address _token,
+    uint256 _tokenDecimals,
+    uint256 _tokenWeight,
+    uint256 _minProfitBps,
+    uint256 _maxUsdgAmount,
+    uint256 _maxLongOiAmount,
+    uint256 _maxShortOiAmount,
+    bool _isStable,
+    bool _isShortable
+) external;
+```
+Configures a token with all its parameters.
+
+```solidity
+function setUsdgAmount(address _token, uint256 _amount) external;
+```
+Sets the USDG amount for a token.
+
+```solidity
+function setBufferAmount(address _token, uint256 _amount) external;
+```
+Sets the buffer amount for a token.
+
+```solidity
+function setMaxGlobalShortSize(address _token, uint256 _amount) external;
+```
+Sets the maximum global short size for a token.
+
+### Fee and Rate Configuration
+
+```solidity
+function setFundingRate(
+    uint256 _fundingInterval,
+    uint256 _fundingRateFactor,
+    uint256 _stableFundingRateFactor
+) external;
+```
+Sets the funding rate parameters.
+
+```solidity
+function setFees(
+    uint256 _taxBasisPoints,
+    uint256 _stableTaxBasisPoints,
+    uint256 _mintBurnFeeBasisPoints,
+    uint256 _swapFeeBasisPoints,
+    uint256 _stableSwapFeeBasisPoints,
+    uint256 _marginFeeBasisPoints,
+    uint256 _liquidationFeeUsd,
+    uint256 _minProfitTime,
+    bool _hasDynamicFees
+) external;
+```
+Sets all fee parameters.
+
+```solidity
+function setPriceFeed(address _priceFeed) external;
+```
+Sets the price feed address.
+
+## Action Functions
+
+### Token Operations
+
+```solidity
+function directPoolDeposit(address _token) external;
+```
+Deposits a token directly to the pool without minting USDG.
+
+```solidity
+function buyUSDG(address _token, address _receiver) external returns (uint256);
+```
+Buys USDG tokens with the provided token.
+
+```solidity
+function sellUSDG(address _token, address _receiver) external returns (uint256);
+```
+Sells USDG tokens for the specified token.
+
+```solidity
+function swap(address _tokenIn, address _tokenOut, address _receiver) external returns (uint256);
+```
+Swaps tokens.
+
+```solidity
+function withdrawFees(address _token, address _receiver) external returns (uint256);
+```
+Withdraws collected fees to the specified receiver.
+
+```solidity
+function upgradeVault(address _receiver, address _token, uint256 _amount) external;
+```
+Upgrades the Vault by transferring tokens to a new Vault.
+
+### Position Management
+
+```solidity
+function increasePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    uint256 _sizeDelta,
+    bool _isLong
+) external;
+```
+Increases the size of a position.
+
+```solidity
+function decreasePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    uint256 _collateralDelta,
+    uint256 _sizeDelta,
+    bool _isLong,
+    address _receiver
+) external returns (uint256);
+```
+Decreases the size of a position.
+
+```solidity
+function liquidatePosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    address _feeReceiver
+) external;
+```
+Liquidates a position.
+
+## Utility Functions
+
+### Price and Value Calculation
+
+```solidity
+function tokenToUsdMin(address _token, uint256 _tokenAmount) external view returns (uint256);
+```
+Converts token amount to minimum USD value.
+
+```solidity
+function getRedemptionAmount(address _token, uint256 _usdgAmount) external view returns (uint256);
+```
+Returns the amount of tokens to be redeemed for USDG.
+
+```solidity
+function getMaxPrice(address _token) external view returns (uint256);
+```
+Returns the maximum price for a token.
+
+```solidity
+function getMinPrice(address _token) external view returns (uint256);
+```
+Returns the minimum price for a token.
+
+### Position Calculations
+
+```solidity
+function getPosition(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong
+) external view returns (
+    uint256 size,
+    uint256 collateral,
+    uint256 averagePrice,
+    uint256 entryFundingRate,
+    uint256 reservedAmount,
+    uint256 realisedPnl,
+    bool hasRealisedProfit,
+    uint256 lastIncreasedTime
+);
+```
+Returns all details about a position.
+
+```solidity
+function getDelta(
+    address _indexToken,
+    uint256 _size,
+    uint256 _averagePrice,
+    bool _isLong,
+    uint256 _lastIncreasedTime
+) external view returns (bool, uint256);
+```
+Returns the delta (profit/loss) for a position.
+
+```solidity
+function validateLiquidation(
+    address _account,
+    address _collateralToken,
+    address _indexToken,
+    bool _isLong,
+    bool _raise
+) external view returns (uint256, uint256);
+```
+Validates whether a position can be liquidated.
+
+```solidity
+function getFeeBasisPoints(
+    address _token,
+    uint256 _usdgDelta,
+    uint256 _feeBasisPoints,
+    uint256 _taxBasisPoints,
+    bool _increment
+) external view returns (uint256);
+```
+Calculates the fee basis points based on token imbalance.

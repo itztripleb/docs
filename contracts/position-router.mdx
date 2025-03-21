@@ -1,0 +1,307 @@
+---
+title: 'PositionRouter'
+description: 'Manages the creation and execution of position orders with a queue-based system'
+---
+
+# PositionRouter
+
+The PositionRouter is a crucial component of the Satoshi Perps protocol that implements a gas-efficient queue-based system for position execution. It allows users to submit position requests that are executed in batches by keepers, significantly reducing gas costs for users.
+
+<Note>
+For visual flowcharts of the position creation and execution process, see the [Protocol Flow Charts](/contracts/flow-charts) page.
+</Note>
+
+## Contract Overview
+
+The PositionRouter handles:
+- Creating requests to increase or decrease positions
+- Queueing position requests for batch execution
+- Executing position requests in an efficient manner
+- Managing execution fees for position requests
+- Providing callbacks to notify external contracts when positions are executed
+
+<Note>
+The PositionRouter is designed to handle high-volume trading with minimal gas costs per trade.
+</Note>
+
+## Key Functions
+
+### Position Creation
+
+```solidity
+function createIncreasePosition(
+    address[] memory _path,
+    address _indexToken,
+    uint256 _amountIn,
+    uint256 _minOut,
+    uint256 _sizeDelta,
+    bool _isLong,
+    uint256 _acceptablePrice,
+    uint256 _executionFee,
+    bytes32 _referralCode,
+    address _callbackTarget
+) external payable returns (bytes32);
+```
+
+Creates a request to increase a position. Returns a unique request key.
+
+```solidity
+function createIncreasePositionETH(
+    address[] memory _path,
+    address _indexToken,
+    uint256 _minOut,
+    uint256 _sizeDelta,
+    bool _isLong,
+    uint256 _acceptablePrice,
+    uint256 _executionFee,
+    bytes32 _referralCode,
+    address _callbackTarget
+) external payable returns (bytes32);
+```
+
+Creates a request to increase a position using ETH as the input token.
+
+### Position Decrease
+
+```solidity
+function createDecreasePosition(
+    address[] memory _path,
+    address _indexToken,
+    uint256 _collateralDelta,
+    uint256 _sizeDelta,
+    bool _isLong,
+    address _receiver,
+    uint256 _acceptablePrice,
+    uint256 _minOut,
+    uint256 _executionFee,
+    bool _withdrawETH,
+    address _callbackTarget
+) external payable returns (bytes32);
+```
+
+Creates a request to decrease a position.
+
+### Position Execution
+
+```solidity
+function executeIncreasePosition(bytes32 _key, address _executionFeeReceiver) external returns (bool);
+```
+
+Executes a queued increase position request. Returns a boolean indicating execution success.
+
+```solidity
+function executeDecreasePosition(bytes32 _key, address _executionFeeReceiver) external returns (bool);
+```
+
+Executes a queued decrease position request. Returns a boolean indicating execution success.
+
+### Batch Execution
+
+```solidity
+function executeIncreasePositions(uint256 _endIndex, address payable _executionFeeReceiver) external;
+```
+
+Executes multiple increase position requests in a single transaction.
+
+```solidity
+function executeDecreasePositions(uint256 _endIndex, address payable _executionFeeReceiver) external;
+```
+
+Executes multiple decrease position requests in a single transaction.
+
+## Request Queue Mechanics
+
+The PositionRouter maintains two separate queues:
+1. **Increase Position Queue**: For requests to open or add to positions
+2. **Decrease Position Queue**: For requests to reduce or close positions
+
+Each request is stored with:
+- A unique request key
+- The parameters needed for execution
+- A timestamp indicating when the request was created
+- Whether the request has been executed
+
+<Warning>
+Requests have a limited lifespan defined by the `maxTimeDelay` parameter. If not executed within this time window, they can be cancelled by the requester.
+</Warning>
+
+## Callback System
+
+The PositionRouter implements a callback mechanism to notify external contracts when positions are executed:
+
+```solidity
+function gmxPositionCallback(bytes32 positionKey, bool isExecuted, bool isIncrease) external;
+```
+
+When a position is executed, if a callback target was specified in the request, this function is called on the target contract to notify it of the execution result. The callback target must implement the IPositionRouterCallbackReceiver interface.
+
+## Execution Fee Mechanism
+
+To incentivize keepers to execute position requests, the PositionRouter requires an execution fee for each request:
+
+- Users include an execution fee when creating a position request
+- The fee is refunded if the request fails to execute
+- When a request is executed successfully, the fee is sent to the keeper
+
+<Info>
+The minimum execution fee is defined by the `minExecutionFee` parameter and can be adjusted by the contract admin.
+</Info>
+
+## Integration with Vault
+
+The PositionRouter interacts with the Vault contract to execute positions:
+
+1. When an increase position request is executed, the PositionRouter:
+   - Transfers tokens from the user (if not already done)
+   - Calls Vault's increasePosition function
+   
+2. When a decrease position request is executed, the PositionRouter:
+   - Calls Vault's decreasePosition function
+   - Handles token transfers back to the user
+
+## Callback Gas Limits
+
+The PositionRouter implements configurable gas limits for position execution callbacks:
+
+```solidity
+uint256 public callbackGasLimit;
+mapping (address => uint256) public customCallbackGasLimits;
+```
+
+- `callbackGasLimit`: Default gas limit for all callbacks
+- `customCallbackGasLimits`: Custom gas limits for specific callback targets
+
+Admins can set these limits using:
+```solidity
+function setCallbackGasLimit(uint256 _callbackGasLimit) external;
+function setCustomCallbackGasLimit(address _target, uint256 _gasLimit) external;
+```
+
+## Position Cancellation
+
+Users can cancel their pending position requests if they haven't been executed within the allowed time window:
+
+```solidity
+function cancelIncreasePosition(bytes32 _key, address _executionFeeReceiver) external;
+function cancelDecreasePosition(bytes32 _key, address _executionFeeReceiver) external;
+```
+
+These functions validate that:
+- The request exists
+- The caller is the request creator
+- The request has not been executed
+- The execution timeframe has expired
+
+## Position Keepers
+
+The PositionRouter uses a keeper system to manage who can execute position requests:
+
+```solidity
+mapping (address => bool) public isPositionKeeper;
+```
+
+Only approved position keepers can execute position requests, controlled by:
+```solidity
+function setPositionKeeper(address _account, bool _isActive) external;
+```
+
+## Security Considerations
+
+The PositionRouter implements several security features:
+- **Frontrunning Protection**: Price bounds protect users from price manipulation
+- **Slippage Protection**: Minimum output amounts ensure fair execution
+- **Delay Parameters**: Configurable minimum and maximum delay between request and execution
+- **Access Control**: Role-based permissions for execution and configuration
+- **Circuit Breakers**: The contract can be paused in emergency situations
+- **Gas Limit Controls**: Prevents callback functions from using excessive gas
+
+## Example Usage
+
+<Steps>
+  <Step title="Submit an Increase Position Request">
+    A trader wants to open a 5x long ETH position with 1 ETH as collateral.
+    
+    ```javascript
+    const path = [wethAddress]; // No token conversion needed
+    const indexToken = wethAddress; // Long ETH
+    const amountIn = ethers.utils.parseEther("1"); // 1 ETH
+    const minOut = 0; // No swap, so minOut is 0
+    const sizeDelta = ethers.utils.parseUnits("5", 30); // 5x leverage
+    const isLong = true;
+    const acceptablePrice = ethers.utils.parseUnits("2000", 30); // Max acceptable ETH price
+    const executionFee = ethers.utils.parseEther("0.01"); // Execution fee
+    const referralCode = ethers.utils.formatBytes32String(""); // No referral
+    const callbackTarget = ethers.constants.AddressZero; // No callback
+    
+    const requestKey = await positionRouter.createIncreasePositionETH(
+      path,
+      indexToken,
+      minOut,
+      sizeDelta,
+      isLong,
+      acceptablePrice,
+      executionFee,
+      referralCode,
+      callbackTarget,
+      { value: amountIn.add(executionFee) }
+    );
+    ```
+  </Step>
+  <Step title="Keeper Executes the Request">
+    A keeper monitors the pending requests and executes them.
+    
+    ```javascript
+    // Keeper executes the position
+    await positionRouter.executeIncreasePosition(
+      requestKey, 
+      keeperAddress
+    );
+    ```
+  </Step>
+  <Step title="Submit a Decrease Position Request">
+    Later, the trader wants to close half of their position.
+    
+    ```javascript
+    const path = [wethAddress]; // No token conversion
+    const indexToken = wethAddress;
+    const collateralDelta = 0; // Don't withdraw collateral
+    const sizeDelta = ethers.utils.parseUnits("2.5", 30); // Close half the position
+    const isLong = true;
+    const receiver = traderAddress;
+    const acceptablePrice = ethers.utils.parseUnits("1900", 30); // Min acceptable ETH price
+    const minOut = 0; // No minimum output for collateral
+    const executionFee = ethers.utils.parseEther("0.01");
+    const withdrawETH = true; // Receive ETH instead of WETH
+    const callbackTarget = ethers.constants.AddressZero;
+    
+    const requestKey = await positionRouter.createDecreasePosition(
+      path,
+      indexToken,
+      collateralDelta,
+      sizeDelta,
+      isLong,
+      receiver,
+      acceptablePrice,
+      minOut,
+      executionFee,
+      withdrawETH,
+      callbackTarget,
+      { value: executionFee }
+    );
+    ```
+  </Step>
+</Steps>
+
+## Batch Execution Efficiency
+
+One of the PositionRouter's key features is batch execution, which allows keepers to execute multiple position requests in a single transaction:
+
+```solidity
+// Execute up to 10 increase positions in one transaction
+await positionRouter.executeIncreasePositions(10, keeperAddress);
+
+// Execute up to 10 decrease positions in one transaction
+await positionRouter.executeDecreasePositions(10, keeperAddress);
+```
+
+This significantly reduces the average gas cost per position by amortizing fixed gas costs across multiple executions.
